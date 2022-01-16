@@ -248,7 +248,7 @@ class Minimizer(object):
                 self.cvx_constraint_w.value = constraint_w.reshape(-1)
 
         try:
-            self.prob.solve(verbose=verbose, solver=cvx.SCS)
+            self.prob.solve(verbose=verbose, solver=cvx.ECOS)
         except:
             raise
             print('centroid', self.cvx_centroid.value)
