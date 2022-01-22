@@ -74,7 +74,7 @@ python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset g
 
 # Our additions:
 We have added three parameters:
-- --original_data: which is by default no. This means that the model will run on the authors data. If yes or y is filled in, the model will first make a similar dataset to that of the authors (same preprocessing techniques). Only the shuffling will be different.
+- --original_data: which is by default no. This means that the model will run on the authors data. If yes or y is filled in, the model will first make a dataset similar to that of the authors (same preprocessing techniques), where only the shuffling will be different. Thereafter the created datasets will be used to run. 
 - --rand_seed: which is by default 0. This one should be a natural value $(\mathbb{N})$, i.e. a non-negative integer. However, a value $\in$ {0,1,2,3} is recommended, since this value is added to the seeds already implemented by the authors.
 - --plot_results: which is by default no. **This one only works if and only if the chosen dataset has been run for all three attacks with the ten epsilons from 0.1 to 1.** Thus this one can only be --plot_results y if all attacks have already been run with the ten epsilons (3 * 10) or if one runs multiple commands with a ; in between. Then the last command can include --plot_results y (explained at the bottom).
 
