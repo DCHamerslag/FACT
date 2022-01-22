@@ -3,26 +3,38 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals  
 
-import abc
-import sys
+############################################ CHANGED THIS ############################################
+# import abc
+# import sys
+############################################ CHANGED THIS ############################################
 
 import numpy as np
-import pandas as pd
-from sklearn import linear_model, preprocessing, cluster, svm
-import matplotlib.pyplot as plt
-import seaborn as sns
-import scipy.linalg as slin
-import scipy.sparse.linalg as sparselin
-import scipy.sparse as sparse 
-from scipy.optimize import fmin_l_bfgs_b, fmin_cg, fmin_ncg
+############################################ CHANGED THIS ############################################
+# import pandas as pd
+# from sklearn import linear_model, preprocessing, cluster, svm
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+# import scipy.linalg as slin
+# import scipy.sparse.linalg as sparselin
+# import scipy.sparse as sparse 
+from sklearn import svm
+from scipy.optimize import fmin_ncg
+# from scipy.optimize import fmin_l_bfgs_b, fmin_cg, fmin_ncg
+############################################ CHANGED THIS ############################################
 
-import os.path
-import time
-import IPython
+
+############################################ CHANGED THIS ############################################
+# import os.path
+# import time
+# import IPython
+############################################ CHANGED THIS ############################################
 import tensorflow as tf
 import math
 
-from .genericNeuralNet import GenericNeuralNet, variable, variable_with_weight_decay
+############################################ CHANGED THIS ############################################
+from .genericNeuralNet import GenericNeuralNet, variable_with_weight_decay
+# from .genericNeuralNet import GenericNeuralNet, variable, variable_with_weight_decay
+############################################ CHANGED THIS ############################################
 
 def log_loss(x, t):
     exponents = -(x-1)/t
@@ -62,7 +74,8 @@ class SmoothHinge(GenericNeuralNet):
 
     # Expects labels to be +1 or -1
 
-    def __init__(self, positive_sensitive_el,negative_sensitive_el,sensitive_feature_idx,input_dim, temp, weight_decay, use_bias, **kwargs):
+    ############################################ CHANGED BY STUDENTS ###########################################
+    def __init__(self, positive_sensitive_el,negative_sensitive_el,sensitive_feature_idx,input_dim, temp, weight_decay, use_bias, rand_seed, **kwargs):
         self.sensitive_feature_idx = sensitive_feature_idx
         self.weight_decay = weight_decay
         self.input_dim = input_dim
@@ -70,6 +83,8 @@ class SmoothHinge(GenericNeuralNet):
         self.use_bias = use_bias
         self.positive_sensitive_el =positive_sensitive_el
         self.negative_sensitive_el =negative_sensitive_el
+        self.rand_seed = rand_seed
+    ############################################ CHANGED BY STUDENTS ###########################################
 
         super(SmoothHinge, self).__init__(**kwargs)
 
@@ -79,7 +94,9 @@ class SmoothHinge(GenericNeuralNet):
             loss='hinge',
             tol=1e-6,
             fit_intercept=self.use_bias,
-            random_state=24,
+            ############################################ CHANGED BY STUDENTS ###########################################
+            random_state=24+rand_seed,
+            ############################################ CHANGED BY STUDENTS ###########################################
             max_iter=5000)
 
         C_minus_one = 1.0 / ((self.num_train_examples - 1) * self.weight_decay)
@@ -88,7 +105,9 @@ class SmoothHinge(GenericNeuralNet):
             loss='hinge',
             tol=1e-6,
             fit_intercept=self.use_bias,
-            random_state=24,
+            ############################################ CHANGED BY STUDENTS ###########################################
+            random_state=24+rand_seed,
+            ############################################ CHANGED BY STUDENTS ###########################################
             max_iter=5000)     
 
         self.set_params_op = self.set_params()

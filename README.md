@@ -1,11 +1,108 @@
-# FACT
+# Fairness, Accountability, Confidentiality and Transparency in AI
+This repository contains code for the introduced attacks in [Exacerbating Algorithmic Bias through Fairness Attacks](https://arxiv.org/pdf/2012.08723.pdf).
+Furthermore, some changes are made to evaluate whether the results/paper is reproducable.
 
-### Voor het installeren (dit werkte voor mij maar idk)
-In de folder met environment.yml:
+# Exacerbating Algorithmic Bias through Fairness Attacks
+```
+@article{mehrabi2020exacerbating,
+  title={Exacerbating Algorithmic Bias through Fairness Attacks},
+  author={Mehrabi, Ninareh and Naveed, Muhammad and Morstatter, Fred and Galstyan, Aram},
+  journal={arXiv preprint arXiv:2012.08723},
+  year={2020}
+}
+```
 
-conda env create \
-conda activate FACT-AI \
-conda install -c cvxgrp cvxcanon==0.1.1 \
-pip uninstall cvxpy \
-pip install cvxpy==0.4.10 \
-conda install -c conda-forge scipy==1.1.0 
+Their code builds upon the code developed by different authors. Their LICENSE.md file is still included to give due credit to these researchers, and to document that their license allows us to build upon their work. If necessary, give them credit by citing, which you can find on the GitHub link of [Ninareh](https://github.com/Ninarehm/attack).
+
+The citations of the datasets are as follows:
+	For German and Drug consumption datasets cite:
+ ```
+@misc{Dua:2019 ,
+author = "Dua, Dheeru and Graff, Casey",
+year = "2017",
+title = "{UCI} Machine Learning Repository",
+url = "http://archive.ics.uci.edu/ml",
+institution = "University of California, Irvine, School of Information and Computer Sciences" }
+ ```
+ For the COMPAS dataset cite: 	
+ ```
+@article{larson2016compas,
+  title={Compas analysis},
+  author={Larson, J and Mattu, S and Kirchner, L and Angwin, J},
+  journal={GitHub, available at: https://github. com/propublica/compas-analysis[Google Scholar]},
+  year={2016}
+}
+ ```
+
+# Tested Environment
+The code was tested in the environment provided by the authors. The following requirements would work:  
+Python 3.6
+PIP 20.3.1
+setuptools 19.2 (in most of the cases you have to downgrade)
+Tensorflow 1.12.3
+scikit-learn 0.23.1  
+tensorboard 1.12.2
+cvxpy 0.4.11 [cvxpy 1.0+ is not backwards compatible, therefore the downgrade of setuptools]
+CVXcanon 0.1.1  
+scs 2.1.2
+scipy 1.1.0  
+numpy 1.16.2
+pandas 1.1.4  
+Matplotlib 3.3.3  
+tabulate 0.8.9
+seaborn 0.11.0  
+tqdm 4.62.3
+IPython 7.16.1
+pillow 8.0.1
+
+
+# Running Instructions
+The dataset can be replaced by the dataset of your choice. To do this the right way:
+- German: --dataset german --sensitive_attr_filename german_group_label.npz
+- Compas: --dataset compas --sensitive_attr_filename compas_group_label.npz
+- Drug: --dataset drug --sensitive_attr_filename drug2_group_label.npz
+
+Same goes for the attacks:
+- Influence attack on fairness (IAF): --method IAF
+- Random anchoring attack (RAA): --method RAA
+- Non-random anchoring attack (NRAA): --method NRAA  
+
+To run the attacks (changes can be made accordingly to epsilon, sensitive_feature_idx, dataset etc.) as explained in the [paper](https://arxiv.org/pdf/2012.08723.pdf):
+```bash
+python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset german --use_slab --sensitive_feature_idx 36 --sensitive_attr_filename german_group_label.npz --method IAF --epsilon 0.1
+```
+
+# Our additions:
+We have added three parameters:
+- --original_data: which is by default no. This means that the model will run on the authors data. If yes or y is filled in, the model will first make a similar dataset to that of the authors (same preprocessing techniques). Only the shuffling will be different.
+- --rand_seed: which is by default 0. This one should be a natural value $(\mathbb{N})$, i.e. a non-negative integer. However, a value $\in$ {0,1,2,3} is recommended, since this value is added to the seeds already implemented by the authors.
+- --plot_results: which is by default no. **This one only works if and only if the chosen dataset has been run for all three attacks with the ten epsilons from 0.1 to 1.** Thus this one can only be --plot_results y if all attacks have already been run with the ten epsilons (3 * 10) or if one runs multiple commands with a ; in between. Then the last command can include --plot_results y (explained at the bottom).
+
+We have added four folders in main folder Fairness_attack:
+- authors_data: which is the data provided by the authors.
+- original_data: which consists of a resources folder that contains the original raw data. To try and reproduce the results of the authors, a file named make_datasets.py is automatically called if --original_data y is included in the run. The process of reproducing the datasets, is covered in the next folder.
+- reverse_engineering: which also consists of the data provided by the authors as well as the original raw data. The Datasets - reverse_engineering notebook is there to show our reverse_engineering process and how we managed to create the same datasets by performing different operations and transformations.
+- results: which consists of a plot_results.py file and a notebook with the same code. The first can only be called in the command if and only if all the attacks have been run with 10 epsilons varying from 0.1 up to 1 (explained later on in this file as well as in our paper). The notebook is there if one does not want to plot the results immediately after running. 
+
+
+Furthermore, for convenience, we set the **position of the sensitive feature at the start of each original dataset, thus sensitive_feature_idx is always 0**, if --original_data y.
+
+To run IAF for the original german dataset (--original_data y and --sensitive_feature_idx 0):
+```bash
+python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset german --use_slab --sensitive_feature_idx 0 --sensitive_attr_filename german_group_label.npz --method IAF --epsilon 0.1 --original_y
+```
+
+
+To run the same example above with a different seed (+1 on the seeds implemented by the authors):
+```bash
+python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset german --use_slab --sensitive_feature_idx 0 --sensitive_attr_filename german_group_label.npz --method IAF --epsilon 0.1 --original_y --rand_seed 1
+```
+
+In case one wants to **run all three attacks with all epsilons between [0,1]**, the same line can be run multiple times in succession with a ; between the lines. On the last line --plot_results y is acceptable in this case (3 * 10) have already been run then. To give an example, let's define x as the previous command with attack method IAF and each time a different epsilon, y as the previous command with attack method RAA and each time a different epsilon and z as again the previous command with attack method NRAA and each time a different epsilon. Then we can run all the commands at once, with the --plot_results y included in the last command.
+```bash
+x; x; x; x; x; x; x; x; x; x; y; y; y; y; y; y; y; y; y; y; z; z; z; z; z; z; z; z; z; z(this one includes --plot_results y);
+```
+
+For the authors german dataset this will produce and automatically plot the following image (with the default seed).
+To generate the dataframe, you can make sure to print the dataframe specified at the bottom of the function plot_seed() in the plot_results.py file:
+![](../../authors_data_seed_0-german.png)

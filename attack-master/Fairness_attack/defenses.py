@@ -3,16 +3,27 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-import copy
-import sys
+############################################ CHANGED THIS ############################################
+# import copy
+############################################ CHANGED THIS ############################################
+############################################ CHANGED THIS ############################################
+# import sys
+############################################ CHANGED THIS ############################################
 
 import numpy as np
-from sklearn import metrics, model_selection, neighbors
+############################################ CHANGED THIS ############################################
+# from sklearn import metrics, model_selection, neighbors
+from sklearn import metrics
+############################################ CHANGED THIS ############################################
 
-import scipy.linalg as slin
+############################################ CHANGED THIS ############################################
+# import scipy.linalg as slin
+############################################ CHANGED THIS ############################################
 import scipy.sparse as sparse
 
-import upper_bounds
+############################################ CHANGED THIS ############################################
+# import upper_bounds
+############################################ CHANGED THIS ############################################
 import data_utils as data
 
 
@@ -197,272 +208,278 @@ class DataDef(object):
         losses = 1 - self.Y_modified * (self.X_modified.dot(w) + b)
         return losses
 
-    def get_sqrt_inv_covs(self, use_emp=False):
-        if use_emp:
-            sqrt_inv_covs = data.get_sqrt_inv_cov(self.X_modified, self.Y_modified, self.class_map)
-        else:
-            sqrt_inv_covs = data.get_sqrt_inv_cov(self.X_train, self.Y_train, self.class_map)
-        return sqrt_inv_covs
+    ############################################ CHANGED THIS ############################################
+    # def get_sqrt_inv_covs(self, use_emp=False):
+    #     if use_emp:
+    #         sqrt_inv_covs = data.get_sqrt_inv_cov(self.X_modified, self.Y_modified, self.class_map)
+    #     else:
+    #         sqrt_inv_covs = data.get_sqrt_inv_cov(self.X_train, self.Y_train, self.class_map)
+    #     return sqrt_inv_covs
+    ############################################ CHANGED THIS ############################################
 
-    def get_knn_dists(self, num_neighbors, use_emp=False):
-        metric = 'euclidean'
-        if use_emp:
-            nbrs = neighbors.NearestNeighbors(
-                n_neighbors=num_neighbors,
-                metric=metric).fit(
-                    self.X_modified)
-        else:
-            nbrs = neighbors.NearestNeighbors(
-                n_neighbors=num_neighbors,
-                metric=metric).fit(
-                    self.X_train)
-        # Regardless of whether you use emp, we still want distances to the whole (modified) dataset.
-        dists_to_each_neighbor, _ = nbrs.kneighbors(self.X_modified)
-        return np.sum(dists_to_each_neighbor, axis=1)
+    ############################################ CHANGED THIS ############################################
+    # def get_knn_dists(self, num_neighbors, use_emp=False):
+    #     metric = 'euclidean'
+    #     if use_emp:
+    #         nbrs = neighbors.NearestNeighbors(
+    #             n_neighbors=num_neighbors,
+    #             metric=metric).fit(
+    #                 self.X_modified)
+    #     else:
+    #         nbrs = neighbors.NearestNeighbors(
+    #             n_neighbors=num_neighbors,
+    #             metric=metric).fit(
+    #                 self.X_train)
+    #     # Regardless of whether you use emp, we still want distances to the whole (modified) dataset.
+    #     dists_to_each_neighbor, _ = nbrs.kneighbors(self.X_modified)
+    #     return np.sum(dists_to_each_neighbor, axis=1)
+    ############################################ CHANGED THIS ############################################
 
+    ############################################ CHANGED THIS ############################################
+    # # Might be able to speed up; is svds actually performant on dense matrices?
+    # def project_to_low_rank(
+    #     self,
+    #     k,
+    #     use_emp=False,
+    #     get_projected_data=False):
+    #     """
+    #     Projects to the rank (k+2) subspace defined by the top k SVs, mu_pos, and mu_neg.
 
-    # Might be able to speed up; is svds actually performant on dense matrices?
-    def project_to_low_rank(
-        self,
-        k,
-        use_emp=False,
-        get_projected_data=False):
-        """
-        Projects to the rank (k+2) subspace defined by the top k SVs, mu_pos, and mu_neg.
+    #     If k is None, it tries to find a good k by taking the top 1000 SVs and seeing if we can
+    #     find some k such that sigma_k / sigma_1 < 0.1. If we can, we take the smallest such k.
+    #     If not, we take k = 1000 or d-1. (but when we add 2 back, this seems bad?)
 
-        If k is None, it tries to find a good k by taking the top 1000 SVs and seeing if we can
-        find some k such that sigma_k / sigma_1 < 0.1. If we can, we take the smallest such k.
-        If not, we take k = 1000 or d-1. (but when we add 2 back, this seems bad?)
+    #     Square root of the sum of squares is Frobenius norm.
+    #     """
+    #     if use_emp:
+    #         X = self.X_modified
+    #         Y = self.Y_modified
+    #     else:
+    #         X = self.X_train
+    #         Y = self.Y_train
 
-        Square root of the sum of squares is Frobenius norm.
-        """
-        if use_emp:
-            X = self.X_modified
-            Y = self.Y_modified
-        else:
-            X = self.X_train
-            Y = self.Y_train
+    #     if sparse.issparse(X):
+    #         sq_fro_norm = sparse.linalg.norm(X, 'fro') ** 2
+    #     else:
+    #         sq_fro_norm = np.linalg.norm(X, 'fro') ** 2
 
-        if sparse.issparse(X):
-            sq_fro_norm = sparse.linalg.norm(X, 'fro') ** 2
-        else:
-            sq_fro_norm = np.linalg.norm(X, 'fro') ** 2
+    #     if k is not None:
+    #         assert k > 0
+    #         assert k < self.X_train.shape[1]
 
-        if k is not None:
-            assert k > 0
-            assert k < self.X_train.shape[1]
+    #         U, S, V = sparse.linalg.svds(X, k=k, which='LM')
 
-            U, S, V = sparse.linalg.svds(X, k=k, which='LM')
+    #     # If k is not specified, try to automatically find a good value
+    #     # This is a bit confusing because svds returns eigenvalues in increasing order
+    #     # so the meaning of k is reversed
+    #     else:
+    #         search_k = min(1000, X.shape[1] - 1)
+    #         target_sv_ratio = 0.95
 
-        # If k is not specified, try to automatically find a good value
-        # This is a bit confusing because svds returns eigenvalues in increasing order
-        # so the meaning of k is reversed
-        else:
-            search_k = min(1000, X.shape[1] - 1)
-            target_sv_ratio = 0.95
+    #         U, S, V = sparse.linalg.svds(X, k=search_k, which='LM')
 
-            U, S, V = sparse.linalg.svds(X, k=search_k, which='LM')
+    #         # Make sure it's sorted in the order we think it is...
+    #         sort_idx = np.argsort(S)[::-1]
+    #         S = S[sort_idx]
+    #         V = V[sort_idx, :]
+    #         max_sv = np.max(S)
 
-            # Make sure it's sorted in the order we think it is...
-            sort_idx = np.argsort(S)[::-1]
-            S = S[sort_idx]
-            V = V[sort_idx, :]
-            max_sv = np.max(S)
+    #         assert S[0] == max_sv
 
-            assert S[0] == max_sv
+    #         sq_sv_cumsum = np.cumsum(np.power(S, 2))
+    #         assert np.all(sq_sv_cumsum < sq_fro_norm)
 
-            sq_sv_cumsum = np.cumsum(np.power(S, 2))
-            assert np.all(sq_sv_cumsum < sq_fro_norm)
+    #         sv_ratios = sq_sv_cumsum / sq_fro_norm
 
-            sv_ratios = sq_sv_cumsum / sq_fro_norm
+    #         if sv_ratios[-1] > target_sv_ratio:
+    #             k = np.where(sv_ratios > target_sv_ratio)[0][0]
+    #         else:
+    #             print('  Giving up -- max ratio was %s' % np.max(sv_ratios))
+    #             k = -1
 
-            if sv_ratios[-1] > target_sv_ratio:
-                k = np.where(sv_ratios > target_sv_ratio)[0][0]
-            else:
-                print('  Giving up -- max ratio was %s' % np.max(sv_ratios))
-                k = -1
+    #         V = V[:k, :]
+    #         S = S[:k]
 
-            V = V[:k, :]
-            S = S[:k]
+    #     mu_pos = np.array(np.mean(X[Y == 1, :], axis=0)).reshape(1, -1)
+    #     mu_neg = np.array(np.mean(X[Y == -1, :], axis=0)).reshape(1, -1)
 
-        mu_pos = np.array(np.mean(X[Y == 1, :], axis=0)).reshape(1, -1)
-        mu_neg = np.array(np.mean(X[Y == -1, :], axis=0)).reshape(1, -1)
+    #     V_mu = np.concatenate((V, mu_pos, mu_neg), axis=0)
+    #     P = slin.orth(V_mu.T).T
 
-        V_mu = np.concatenate((V, mu_pos, mu_neg), axis=0)
-        P = slin.orth(V_mu.T).T
+    #     achieved_sv_ratio = np.sum(np.power(S, 2)) / sq_fro_norm
 
-        achieved_sv_ratio = np.sum(np.power(S, 2)) / sq_fro_norm
+    #     if get_projected_data:
+    #         PX_modified = self.X_modified.dot(P.T)
+    #         PX_train = self.X_train.dot(P.T)
+    #         PX_poison = self.X_poison.dot(P.T)
+    #         return P, achieved_sv_ratio, PX_modified, PX_train, PX_poison
+    #     else:
+    #         return P, achieved_sv_ratio
+    ############################################ CHANGED THIS ############################################
 
-        if get_projected_data:
-            PX_modified = self.X_modified.dot(P.T)
-            PX_train = self.X_train.dot(P.T)
-            PX_poison = self.X_poison.dot(P.T)
-            return P, achieved_sv_ratio, PX_modified, PX_train, PX_poison
-        else:
-            return P, achieved_sv_ratio
+    ############################################ CHANGED THIS ############################################
+    # def find_num_points_kept(self, idx_to_keep):
+    #     good_mask = np.zeros(self.X_modified.shape[0], dtype=bool)
+    #     good_mask[self.idx_train] = True
+    #     bad_mask = np.zeros(self.X_modified.shape[0], dtype=bool)
+    #     bad_mask[self.idx_poison] = True
 
+    #     keep_mask = np.zeros(self.X_modified.shape[0], dtype=bool)
+    #     keep_mask[idx_to_keep] = True
 
-    def find_num_points_kept(self, idx_to_keep):
-        good_mask = np.zeros(self.X_modified.shape[0], dtype=bool)
-        good_mask[self.idx_train] = True
-        bad_mask = np.zeros(self.X_modified.shape[0], dtype=bool)
-        bad_mask[self.idx_poison] = True
+    #     frac_of_good_points_kept = np.mean(keep_mask & good_mask) / np.mean(good_mask)
+    #     frac_of_bad_points_kept = np.mean(keep_mask & bad_mask) / np.mean(bad_mask)
 
-        keep_mask = np.zeros(self.X_modified.shape[0], dtype=bool)
-        keep_mask[idx_to_keep] = True
+    #     num_bad_points_removed_by_class = {}
+    #     for y in set(self.Y_modified):
+    #         num_bad_points_removed_by_class[str(y)] = np.sum(~keep_mask & bad_mask & (self.Y_modified == y))
 
-        frac_of_good_points_kept = np.mean(keep_mask & good_mask) / np.mean(good_mask)
-        frac_of_bad_points_kept = np.mean(keep_mask & bad_mask) / np.mean(bad_mask)
-
-        num_bad_points_removed_by_class = {}
-        for y in set(self.Y_modified):
-            num_bad_points_removed_by_class[str(y)] = np.sum(~keep_mask & bad_mask & (self.Y_modified == y))
-
-        return frac_of_good_points_kept, frac_of_bad_points_kept, num_bad_points_removed_by_class
-
-
-    # Because this needs to handle weight decay
-    # this actually creates a copy of model and changes its C
-    def remove_and_retrain(
-        self,
-        dists,
-        model,
-        weight_decay,
-        frac_to_remove,
-        num_folds=5):
-
-        X_def, Y_def, idx_to_keep, num_removed_by_class = remove_quantile(
-            self.X_modified,
-            self.Y_modified,
-            dists=dists,
-            frac_to_remove=frac_to_remove)
-
-        frac_of_good_points_kept, frac_of_bad_points_kept, num_bad_points_removed_by_class = self.find_num_points_kept(idx_to_keep)
-
-        num_bad_points_by_class = {}
-        for y in set(self.Y_poison):
-            num_bad_points_by_class[str(y)] = int(np.round(np.sum(self.Y_poison == y)))
-
-        model_def = copy.deepcopy(model)
-        model_def.C = 1.0 / (X_def.shape[0] * weight_decay)
-
-        mean_cv_score = None
-        if num_folds is not None:
-            k_fold = model_selection.KFold(n_splits=num_folds, shuffle=True, random_state=2)
-
-            cv_scores = model_selection.cross_val_score(
-                model_def,
-                X_def, Y_def,
-                cv=k_fold,
-                n_jobs=np.min((num_folds, 8)))
-            mean_cv_score = np.mean(cv_scores)
-
-        model_def.fit(X_def, Y_def)
-        params_def = np.reshape(model_def.coef_, -1)
-        bias_def = model_def.intercept_[0]
-
-        train_acc = model_def.score(X_def, Y_def)
-        test_acc = model_def.score(self.X_test, self.Y_test)
-        train_loss_overall = upper_bounds.hinge_loss(params_def, bias_def, X_def, Y_def)
-        train_loss_clean = upper_bounds.hinge_loss(params_def, bias_def, self.X_train, self.Y_train)
-        train_loss_poison = upper_bounds.hinge_loss(params_def, bias_def, self.X_poison, self.Y_poison)
-        test_loss = upper_bounds.hinge_loss(params_def, bias_def, self.X_test, self.Y_test)
-
-        results = {}
-        results['train_acc'] = train_acc
-        results['val_acc'] = mean_cv_score
-        results['test_acc'] = test_acc
-        results['train_loss_overall'] = train_loss_overall
-        results['train_loss_clean'] = train_loss_clean
-        results['train_loss_poison'] = train_loss_poison
-        results['test_loss'] = test_loss
-        results['frac_of_good_points_kept'] = frac_of_good_points_kept
-        results['frac_of_bad_points_kept'] = frac_of_bad_points_kept
-        results['num_removed_by_class'] = num_removed_by_class
-        results['num_bad_points_by_class'] = num_bad_points_by_class
-        results['num_bad_points_removed_by_class'] = num_bad_points_removed_by_class
-
-        return results
+    #     return frac_of_good_points_kept, frac_of_bad_points_kept, num_bad_points_removed_by_class
 
 
-    def eval_model(self, ScikitModel, weight_decay, fit_intercept, max_iter, frac_to_remove,
-        intercept_scaling=1,
-        use_slab=False,
-        use_loss=False,
-        verbose=True):
-        """
-        Runs sphere, slab, loss
-        """
+    # # Because this needs to handle weight decay
+    # # this actually creates a copy of model and changes its C
+    # def remove_and_retrain(
+    #     self,
+    #     dists,
+    #     model,
+    #     weight_decay,
+    #     frac_to_remove,
+    #     num_folds=5):
 
-        def report_test_acc(dists, def_str):
-            retrain_results = self.remove_and_retrain(
-                dists,
-                model_def,
-                weight_decay,
-                frac_to_remove,
-                num_folds=None)
+    #     X_def, Y_def, idx_to_keep, num_removed_by_class = remove_quantile(
+    #         self.X_modified,
+    #         self.Y_modified,
+    #         dists=dists,
+    #         frac_to_remove=frac_to_remove)
 
-            test_acc = retrain_results['test_acc']
+    #     frac_of_good_points_kept, frac_of_bad_points_kept, num_bad_points_removed_by_class = self.find_num_points_kept(idx_to_keep)
 
-            if verbose:
-                train_acc = retrain_results['train_acc']
-                frac_of_good_points_kept = retrain_results['frac_of_good_points_kept']
-                frac_of_bad_points_kept = retrain_results['frac_of_bad_points_kept']
+    #     num_bad_points_by_class = {}
+    #     for y in set(self.Y_poison):
+    #         num_bad_points_by_class[str(y)] = int(np.round(np.sum(self.Y_poison == y)))
 
-                print()
-                print('After defending (%s):' % def_str)
-                print('Train (clean+poi): %.3f' % train_acc)
-                print('Test (overall or targeted)   : %.3f' % test_acc)
-                print('Good points kept : %.3f%%' % (frac_of_good_points_kept*100))
-                print('Bad points kept  : %.3f%%' % (frac_of_bad_points_kept*100))
+    #     model_def = copy.deepcopy(model)
+    #     model_def.C = 1.0 / (X_def.shape[0] * weight_decay)
 
-            return test_acc
+    #     mean_cv_score = None
+    #     if num_folds is not None:
+    #         k_fold = model_selection.KFold(n_splits=num_folds, shuffle=True, random_state=2)
 
-        C = 1.0 / (self.X_modified.shape[0] * weight_decay)
-        model_round = ScikitModel(
-            C=C,
-            tol=1e-8,
-            fit_intercept=fit_intercept,
-            intercept_scaling=intercept_scaling,
-            random_state=24,
-            max_iter=max_iter,
-            verbose=True)
-        model_round.fit(self.X_modified, self.Y_modified)
-        test_acc_before_defense = model_round.score(self.X_test, self.Y_test)
+    #         cv_scores = model_selection.cross_val_score(
+    #             model_def,
+    #             X_def, Y_def,
+    #             cv=k_fold,
+    #             n_jobs=np.min((num_folds, 8)))
+    #         mean_cv_score = np.mean(cv_scores)
 
-        print()
-        print('With our attack, no defenses:')
-        print('Train (clean)    : %.3f' % model_round.score(self.X_train, self.Y_train))
-        print('Train (clean+poi): %.3f' % model_round.score(self.X_modified, self.Y_modified))
-        print('Test (overall)   : %.3f' % test_acc_before_defense)
+    #     model_def.fit(X_def, Y_def)
+    #     params_def = np.reshape(model_def.coef_, -1)
+    #     bias_def = model_def.intercept_[0]
 
-        model_def = ScikitModel(
-            C=C,
-            tol=1e-8,
-            fit_intercept=fit_intercept,
-            intercept_scaling=intercept_scaling,
-            random_state=24,
-            max_iter=max_iter,
-            verbose=True)
+    #     train_acc = model_def.score(X_def, Y_def)
+    #     test_acc = model_def.score(self.X_test, self.Y_test)
+    #     train_loss_overall = upper_bounds.hinge_loss(params_def, bias_def, X_def, Y_def)
+    #     train_loss_clean = upper_bounds.hinge_loss(params_def, bias_def, self.X_train, self.Y_train)
+    #     train_loss_poison = upper_bounds.hinge_loss(params_def, bias_def, self.X_poison, self.Y_poison)
+    #     test_loss = upper_bounds.hinge_loss(params_def, bias_def, self.X_test, self.Y_test)
 
-        # L2 defense
-        dists = self.compute_dists_under_Q_over_dataset(
-            Q=None,
-            use_emp_centroids=True,
-            norm=2)
-        highest_test_acc = report_test_acc(dists, 'L2')
+    #     results = {}
+    #     results['train_acc'] = train_acc
+    #     results['val_acc'] = mean_cv_score
+    #     results['test_acc'] = test_acc
+    #     results['train_loss_overall'] = train_loss_overall
+    #     results['train_loss_clean'] = train_loss_clean
+    #     results['train_loss_poison'] = train_loss_poison
+    #     results['test_loss'] = test_loss
+    #     results['frac_of_good_points_kept'] = frac_of_good_points_kept
+    #     results['frac_of_bad_points_kept'] = frac_of_bad_points_kept
+    #     results['num_removed_by_class'] = num_removed_by_class
+    #     results['num_bad_points_by_class'] = num_bad_points_by_class
+    #     results['num_bad_points_removed_by_class'] = num_bad_points_removed_by_class
 
-        # Loss defense
-        if use_loss:
-            dists = self.get_losses(model_round.coef_.reshape(-1), model_round.intercept_)
-            highest_test_acc = max(highest_test_acc, report_test_acc(dists, 'loss'))
+    #     return results
 
-        # Slab defense
-        if use_slab:
-            dists = self.compute_dists_under_Q_over_dataset(
-                Q=self.emp_centroid_vec,
-                use_emp_centroids=True,
-                norm=2)
-            highest_test_acc = max(highest_test_acc, report_test_acc(dists, 'slab'))
 
-        return test_acc_before_defense, highest_test_acc
+    # def eval_model(self, ScikitModel, weight_decay, fit_intercept, max_iter, frac_to_remove,
+    #     intercept_scaling=1,
+    #     use_slab=False,
+    #     use_loss=False,
+    #     verbose=True):
+    #     """
+    #     Runs sphere, slab, loss
+    #     """
+
+    #     def report_test_acc(dists, def_str):
+    #         retrain_results = self.remove_and_retrain(
+    #             dists,
+    #             model_def,
+    #             weight_decay,
+    #             frac_to_remove,
+    #             num_folds=None)
+
+    #         test_acc = retrain_results['test_acc']
+
+    #         if verbose:
+    #             train_acc = retrain_results['train_acc']
+    #             frac_of_good_points_kept = retrain_results['frac_of_good_points_kept']
+    #             frac_of_bad_points_kept = retrain_results['frac_of_bad_points_kept']
+
+    #             print()
+    #             print('After defending (%s):' % def_str)
+    #             print('Train (clean+poi): %.3f' % train_acc)
+    #             print('Test (overall or targeted)   : %.3f' % test_acc)
+    #             print('Good points kept : %.3f%%' % (frac_of_good_points_kept*100))
+    #             print('Bad points kept  : %.3f%%' % (frac_of_bad_points_kept*100))
+
+    #         return test_acc
+
+    #     C = 1.0 / (self.X_modified.shape[0] * weight_decay)
+    #     model_round = ScikitModel(
+    #         C=C,
+    #         tol=1e-8,
+    #         fit_intercept=fit_intercept,
+    #         intercept_scaling=intercept_scaling,
+    #         random_state=24,
+    #         max_iter=max_iter,
+    #         verbose=True)
+    #     model_round.fit(self.X_modified, self.Y_modified)
+    #     test_acc_before_defense = model_round.score(self.X_test, self.Y_test)
+
+    #     print()
+    #     print('With our attack, no defenses:')
+    #     print('Train (clean)    : %.3f' % model_round.score(self.X_train, self.Y_train))
+    #     print('Train (clean+poi): %.3f' % model_round.score(self.X_modified, self.Y_modified))
+    #     print('Test (overall)   : %.3f' % test_acc_before_defense)
+
+    #     model_def = ScikitModel(
+    #         C=C,
+    #         tol=1e-8,
+    #         fit_intercept=fit_intercept,
+    #         intercept_scaling=intercept_scaling,
+    #         random_state=24,
+    #         max_iter=max_iter,
+    #         verbose=True)
+
+    #     # L2 defense
+    #     dists = self.compute_dists_under_Q_over_dataset(
+    #         Q=None,
+    #         use_emp_centroids=True,
+    #         norm=2)
+    #     highest_test_acc = report_test_acc(dists, 'L2')
+
+    #     # Loss defense
+    #     if use_loss:
+    #         dists = self.get_losses(model_round.coef_.reshape(-1), model_round.intercept_)
+    #         highest_test_acc = max(highest_test_acc, report_test_acc(dists, 'loss'))
+
+    #     # Slab defense
+    #     if use_slab:
+    #         dists = self.compute_dists_under_Q_over_dataset(
+    #             Q=self.emp_centroid_vec,
+    #             use_emp_centroids=True,
+    #             norm=2)
+    #         highest_test_acc = max(highest_test_acc, report_test_acc(dists, 'slab'))
+
+    #     return test_acc_before_defense, highest_test_acc
+    ############################################ CHANGED THIS ############################################

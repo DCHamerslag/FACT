@@ -4,7 +4,11 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import os
-import json
+############################################ CHANGED THIS ############################################
+# import json
+import csv
+import glob
+############################################ CHANGED THIS ############################################
 import argparse
 import time
 
@@ -13,8 +17,11 @@ import numpy as np
 import scipy.sparse as sparse
 import data_utils as data
 import datasets
-import upper_bounds
-import defenses
+from results.plot_results import plot_seed
+############################################ CHANGED THIS ############################################
+# import upper_bounds
+# import defenses
+############################################ CHANGED THIS ############################################
 import iterative_attack
 from upper_bounds import hinge_loss, hinge_grad, logistic_grad
 from influence.influence.smooth_hinge import SmoothHinge
@@ -23,8 +30,9 @@ from tensorflow.contrib.learn.python.learn.datasets import base
 
 import tensorflow as tf
 
-
-
+############################################ ADDED THIS ############################################
+time_start = time.time()
+############################################ ADDED THIS ############################################
 
 def get_projection_fn_for_dataset(dataset_name, X, Y, use_slab, use_LP, percentile):
     if dataset_name in ['enron', 'imdb','german','compas','drug']:
@@ -36,27 +44,27 @@ def get_projection_fn_for_dataset(dataset_name, X, Y, use_slab, use_LP, percenti
             less_than_one=False,
             use_lp_rounding=use_LP,
             percentile=percentile)
-    elif dataset_name in ['mnist_17']:
-        projection_fn = data.get_projection_fn(
-            X, Y,
-            sphere=True,
-            slab=use_slab,
-            non_negative=True,
-            less_than_one=True,
-            use_lp_rounding=False,
-            percentile=percentile)
-    elif dataset_name in ['dogfish']:
-        projection_fn = data.get_projection_fn(
-            X, Y,
-            sphere=True,
-            slab=use_slab,
-            non_negative=False,
-            less_than_one=False,
-            use_lp_rounding=False,
-            percentile=percentile)
+    ############################################ CHANGED THIS ############################################
+    # elif dataset_name in ['mnist_17']:
+    #     projection_fn = data.get_projection_fn(
+    #         X, Y,
+    #         sphere=True,
+    #         slab=use_slab,
+    #         non_negative=True,
+    #         less_than_one=True,
+    #         use_lp_rounding=False,
+    #         percentile=percentile)
+    # elif dataset_name in ['dogfish']:
+    #     projection_fn = data.get_projection_fn(
+    #         X, Y,
+    #         sphere=True,
+    #         slab=use_slab,
+    #         non_negative=False,
+    #         less_than_one=False,
+    #         use_lp_rounding=False,
+    #         percentile=percentile)
+    ############################################ CHANGED THIS ############################################
     return projection_fn
-
-np.random.seed(1)
 
 fit_intercept = True
 initial_learning_rate = 0.001
@@ -84,6 +92,12 @@ parser.add_argument('--timed', action="store_true")
 parser.add_argument('--sensitive_feature_idx', default=36)
 parser.add_argument('--method', default="IAF")
 parser.add_argument('--sensitive_attr_filename',default='german_group_label.npz')
+
+############################################ ADDED THIS ###################################################
+parser.add_argument('--original_data', default="no") # check if model runs with authors or original data
+parser.add_argument('--rand_seed', default=0) # add given value to seeds in code (suggested 1, 2 or 3)
+parser.add_argument('--plot_results', default='no') # plot results after finish
+###########################################################################################################
 args = parser.parse_args()
 
 dataset_name = args.dataset
@@ -102,6 +116,15 @@ attack_method = args.method
 sensitive_idx = int(args.sensitive_feature_idx)
 sensitive_file = args.sensitive_attr_filename
 
+############################################ ADDED THIS ############################################
+original_data = args.original_data
+original_data = original_data.lower()
+rand_seed = int(args.rand_seed)
+np.random.seed(1+rand_seed)
+plot_results = args.plot_results
+plot_results = plot_results.lower()
+####################################################################################################
+
 output_root = os.path.join(datasets.OUTPUT_FOLDER, dataset_name, 'influence_data')
 datasets.safe_makedirs(output_root)
 
@@ -113,13 +136,15 @@ else:
 print('epsilon: %s' % epsilon)
 print('use_slab: %s' % use_slab)
 
-if dataset_name == 'enron':
-    weight_decay = 0.09
-elif dataset_name == 'mnist_17':
-    weight_decay = 0.01
-elif dataset_name == 'dogfish':
-    weight_decay = 1.1
-elif dataset_name == 'german':
+############################################ CHANGED THIS ############################################
+# if dataset_name == 'enron':
+#     weight_decay = 0.09
+# elif dataset_name == 'mnist_17':
+#     weight_decay = 0.01
+# elif dataset_name == 'dogfish':
+#     weight_decay = 1.1
+#######################################################################################################
+if dataset_name == 'german':
     weight_decay = 0.09
 elif dataset_name == 'compas':
     weight_decay = 0.09
@@ -169,7 +194,9 @@ else:
     assert total_grad_iter % max_em_iter == 0
     num_grad_iter_per_em = int(np.round(total_grad_iter / max_em_iter))
 
-X_train, Y_train, X_test, Y_test = datasets.load_dataset(dataset_name)
+############################################ CHANGED THIS ############################################
+X_train, Y_train, X_test, Y_test = datasets.load_dataset(dataset_name, original_data, rand_seed)
+######################################################################################################
 
 general_train_idx = X_train.shape[0]
 unique_sensitives = np.sort(np.unique(X_train[:,sensitive_idx]))
@@ -212,7 +239,12 @@ model2 = SmoothHinge(
     model_name=model_name,
     method = attack_method,
     general_train_idx=general_train_idx,
-    sensitive_file=sensitive_file)
+    sensitive_file=sensitive_file,
+    ####### ADDED by students ########
+    original_data=original_data,
+    rand_seed=rand_seed
+    ##################################
+    )
 
 model2.update_train_x_y(X_train, Y_train)
 model2.train()
@@ -237,7 +269,12 @@ X_modified, Y_modified, indices_to_poison, copy_array, advantaged = iterative_at
     general_train_idx,
     sensitive_file,
     attack_method,
-    use_copy=use_copy)
+    use_copy=use_copy,
+    ####### ADDED by students ########
+    original_data=original_data,
+    rand_seed=rand_seed
+    ##################################
+    )
 
 tf.reset_default_graph()
 
@@ -266,7 +303,12 @@ model = SmoothHinge(
     model_name=model_name,
     method = attack_method,
     general_train_idx=general_train_idx,
-    sensitive_file=sensitive_file)
+    sensitive_file=sensitive_file,
+    ####### ADDED by students ########
+    original_data=original_data,
+    rand_seed=rand_seed
+    ##################################
+    )
 
 
 model.update_train_x_y(X_modified, Y_modified)
@@ -318,5 +360,80 @@ for em_iter in range(num_em_iters):
         output_root=output_root,
         num_copies=copy_array,
         stop_after=2,
-        start_time=start_time)
+        start_time=start_time,
+        ####### ADDED by students ########
+        original_data=original_data,
+        rand_seed=rand_seed,
+        model_name=model_name
+        ##################################
+        )
+
+########################################## ADDED BY STUDENTS #############################################################
+time_end = time.time()
+total_time = {"time_taken_seconds": time_end - time_start}
+
+""""Our extension to save the time taken """
+
+if not os.path.isdir("./{}".format("results")):
+    os.mkdir("./{}".format("results"))
+
+# add seed to folder name
+if original_data == "yes" or original_data == "y":
+    dataset_choice = "Original data" + " seed {}".format(rand_seed)
+else:
+    dataset_choice = "Authors data" + " seed {}".format(rand_seed)
+
+if not os.path.isdir("./{}/{}".format("results", dataset_choice)):
+    os.mkdir("./{}/{}".format("results", dataset_choice))
+
+# make path name to folder (results/ original or authors data/ dataset name)
+dataset_namee = [i for i in model_name.split("_") if i in ["german", "drug", "compas"]][0] 
+
+# make folder if it does not exist
+if not os.path.isdir("./{}/{}/{}".format("results", dataset_choice, dataset_namee)):
+    os.mkdir("./{}/{}/{}".format("results", dataset_choice, dataset_namee))
+
+# just a placeholder
+time_and_it = "time_and_it"
+
+# make folder if it does not exist
+if not os.path.isdir("./{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, time_and_it)):
+    os.mkdir("./{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, time_and_it))
+
+# save time taken in seconds for each epsilon in the concerning folder
+csv_column = ['time_taken_seconds', 'iteration']
+csv_file_name = '{}-{}.csv'.format(attack_method, model_name)
+path_to_csv = "./{}/{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, time_and_it, csv_file_name)
+if not os.path.isfile(path_to_csv):
+    try:
+        with open(path_to_csv, 'a') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=csv_column)
+            writer.writeheader()
+
+            writer.writerow(total_time)
+    except IOError:
+        print("I/O error")
+else:
+    with open(path_to_csv, 'a') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=csv_column)
+        writer.writerow(total_time)
+
+# parameters for plotting results immediately after finish
+methods_list = ["/IAF-", "/RAA-", "/NRAA-"]
+folder_measures = ["test_accs", "parities and biases"]
+measures = ["test_acc", "parity", "EO bias"]
+time_and_it = "time_and_it"
+time_and_it_columns = ["time_taken_seconds", "iteration"]
+
+counter_glob = 0
+for i in glob.glob("./results/{}/{}/*".format(dataset_choice, dataset_namee)):
+    counter_glob += len(glob.glob("{}/*".format(i)))
+
+# if --plot_results yes, then plot results immediately after finish
+if plot_results == "y" or plot_results == "yes":
+    # but only if all 3 attacks have been run with 10 epsilons (from 0.1 to 1). This makes 90 files in total.
+    if counter_glob == 90:
+        plot_seed(dataset_namee, dataset_choice, methods_list, folder_measures, measures, time_and_it, time_and_it_columns)
+########################################## ADDED BY STUDENTS ################################################################
+
 print("The end")

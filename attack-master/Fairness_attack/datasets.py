@@ -4,14 +4,18 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import os
-import json
+############################################ CHANGED THIS ############################################
+# import json
+############################################ CHANGED THIS ############################################
 
 import numpy as np
 import scipy.sparse as sparse
 import scipy.io as sio
 
-# Local running
-DATA_FOLDER = './data'
+from original_data import make_datasets 
+
+""" Added this """
+DATA_FOLDER = './authors_data'
 OUTPUT_FOLDER = 'output'
 
 def safe_makedirs(path):
@@ -90,58 +94,68 @@ def check_poisoned_data(X_train, Y_train, X_poison, Y_poison, X_modified, Y_modi
     assert X_modified.shape[0] == Y_modified.shape[0]
     assert X_train.shape[0] * X_poison.shape[0] * X_modified.shape[0] > 0
 
+############################################ CHANGED THIS ############################################
+# def load_dogfish():
+#     dataset_path = os.path.join(DATA_FOLDER)
 
-def load_dogfish():
-    dataset_path = os.path.join(DATA_FOLDER)
+#     train_f = np.load(os.path.join(dataset_path, 'dogfish_900_300_inception_features_train.npz'))
+#     X_train = train_f['inception_features_val']
+#     Y_train = np.array(train_f['labels'] * 2 - 1, dtype=int)
 
-    train_f = np.load(os.path.join(dataset_path, 'dogfish_900_300_inception_features_train.npz'))
-    X_train = train_f['inception_features_val']
-    Y_train = np.array(train_f['labels'] * 2 - 1, dtype=int)
+#     test_f = np.load(os.path.join(dataset_path, 'dogfish_900_300_inception_features_test.npz'))
+#     X_test = test_f['inception_features_val']
+#     Y_test = np.array(test_f['labels'] * 2 - 1, dtype=int)
 
-    test_f = np.load(os.path.join(dataset_path, 'dogfish_900_300_inception_features_test.npz'))
-    X_test = test_f['inception_features_val']
-    Y_test = np.array(test_f['labels'] * 2 - 1, dtype=int)
+#     check_orig_data(X_train, Y_train, X_test, Y_test)
+#     return X_train, Y_train, X_test, Y_test
+############################################ CHANGED THIS ############################################
 
-    check_orig_data(X_train, Y_train, X_test, Y_test)
-    return X_train, Y_train, X_test, Y_test
+############################################ CHANGED THIS ############################################
+# def load_enron_sparse():
+#     dataset_path = os.path.join(DATA_FOLDER)
+#     f = np.load(os.path.join(dataset_path, 'enron1_processed_sparse.npz'))
 
+#     X_train = f['X_train'].reshape(1)[0]
+#     Y_train = f['Y_train'] * 2 - 1
+#     X_test = f['X_test'].reshape(1)[0]
+#     Y_test = f['Y_test'] * 2 - 1
 
-def load_enron_sparse():
-    dataset_path = os.path.join(DATA_FOLDER)
-    f = np.load(os.path.join(dataset_path, 'enron1_processed_sparse.npz'))
+#     print(X_train)
+#     print(Y_train)
 
-    X_train = f['X_train'].reshape(1)[0]
-    Y_train = f['Y_train'] * 2 - 1
-    X_test = f['X_test'].reshape(1)[0]
-    Y_test = f['Y_test'] * 2 - 1
+#     assert(sparse.issparse(X_train))
+#     assert(sparse.issparse(X_test))
 
-    print(X_train)
-    print(Y_train)
+#     check_orig_data(X_train, Y_train, X_test, Y_test)
+#     return X_train, Y_train, X_test, Y_test
+############################################ CHANGED THIS ############################################
 
-    assert(sparse.issparse(X_train))
-    assert(sparse.issparse(X_test))
+############################################ CHANGED THIS ############################################
+# def load_imdb_sparse():
+#     dataset_path = os.path.join(DATA_FOLDER)
+#     f = np.load(os.path.join(dataset_path, 'imdb_processed_sparse.npz'))
 
-    check_orig_data(X_train, Y_train, X_test, Y_test)
-    return X_train, Y_train, X_test, Y_test
+#     X_train = f['X_train'].reshape(1)[0]
+#     Y_train = f['Y_train'].reshape(-1)
+#     X_test = f['X_test'].reshape(1)[0]
+#     Y_test = f['Y_test'].reshape(-1)
 
+#     assert(sparse.issparse(X_train))
+#     assert(sparse.issparse(X_test))
 
-def load_imdb_sparse():
-    dataset_path = os.path.join(DATA_FOLDER)
-    f = np.load(os.path.join(dataset_path, 'imdb_processed_sparse.npz'))
+#     check_orig_data(X_train, Y_train, X_test, Y_test)
+#     return X_train, Y_train, X_test, Y_test
+############################################ CHANGED THIS ############################################
 
-    X_train = f['X_train'].reshape(1)[0]
-    Y_train = f['Y_train'].reshape(-1)
-    X_test = f['X_test'].reshape(1)[0]
-    Y_test = f['Y_test'].reshape(-1)
+""" Added the conidition for the data folder and also added a parameter to the function """
+def load_german(original_data):
+    ######### ADDED BY STUDENTS #########
+    if original_data == "yes" or original_data == "y":
+        DATA_FOLDER = "./original_data" 
+    else:
+        DATA_FOLDER = "./authors_data"
+    #####################################
 
-    assert(sparse.issparse(X_train))
-    assert(sparse.issparse(X_test))
-
-    check_orig_data(X_train, Y_train, X_test, Y_test)
-    return X_train, Y_train, X_test, Y_test
-
-
-def load_german():
     dataset_path = os.path.join(DATA_FOLDER)
     print(os.path.join(dataset_path, "data.npz"))
     f = np.load(os.path.join(dataset_path, "data.npz"))
@@ -157,7 +171,15 @@ def load_german():
     check_orig_data(X_train, Y_train, X_test, Y_test)
     return X_train, Y_train, X_test, Y_test
 
-def load_compas():
+""" Added the conidition for the data folder and also added a parameter to the function """
+def load_compas(original_data):
+    ######### ADDED BY STUDENTS #########
+    if original_data == "yes" or original_data == "y":
+        DATA_FOLDER = "./original_data" 
+    else:
+        DATA_FOLDER = "./authors_data"
+    #####################################
+
     dataset_path = os.path.join(DATA_FOLDER)
     print(os.path.join(dataset_path, "compas_data.npz"))
     f = np.load(os.path.join(dataset_path, "compas_data.npz"))
@@ -173,7 +195,15 @@ def load_compas():
     check_orig_data(X_train, Y_train, X_test, Y_test)
     return X_train, Y_train, X_test, Y_test
 
-def load_drug():
+""" Added the conidition for the data folder and also added a parameter to the function """
+def load_drug(original_data):
+    ######### ADDED BY STUDENTS #########
+    if original_data == "yes" or original_data == "y":
+        DATA_FOLDER = "./original_data" 
+    else:
+        DATA_FOLDER = "./authors_data"
+    #####################################
+
     dataset_path = os.path.join(DATA_FOLDER)
     print(os.path.join(dataset_path, "drug2_data.npz"))
     f = np.load(os.path.join(dataset_path, "drug2_data.npz"))
@@ -189,19 +219,31 @@ def load_drug():
     check_orig_data(X_train, Y_train, X_test, Y_test)
     return X_train, Y_train, X_test, Y_test
 
-def load_dataset(dataset_name):
-    if dataset_name == 'imdb':
-        return load_imdb_sparse()
-    elif dataset_name == 'enron':
-        return load_enron_sparse()
-    elif dataset_name == 'dogfish':
-        return load_dogfish()
-    elif dataset_name == 'german':
-        return load_german()
+def load_dataset(dataset_name, original_data, rand_seed):
+    ################## ADDED BY STUDENTS ##########################
+    if original_data == "yes" or original_data == "y":
+        make_datasets.create_orig_german_dataset(rand_seed)
+        make_datasets.create_orig_compas_dataset(rand_seed)
+        make_datasets.create_orig_drug_dataset(rand_seed)
+    ###############################################################
+
+    ############################################ CHANGED THIS ############################################
+    # if dataset_name == 'imdb':
+    #     return load_imdb_sparse()
+    # elif dataset_name == 'enron':
+    #     return load_enron_sparse()
+    # elif dataset_name == 'dogfish':
+    #     return load_dogfish()
+    ############################################ CHANGED THIS ############################################
+
+    ################## CHANGED BY STUDENTS ##################
+    if dataset_name == 'german':
+        return load_german(original_data)
     elif dataset_name == 'compas':
-        return load_compas()
+        return load_compas(original_data)
     elif dataset_name == 'drug':
-        return load_drug()
+        return load_drug(original_data)
+    #########################################################
     else:
         dataset_path = os.path.join(DATA_FOLDER)
         f = np.load(os.path.join(dataset_path, '%s_train_test.npz' % dataset_name))
@@ -214,62 +256,65 @@ def load_dataset(dataset_name):
         check_orig_data(X_train, Y_train, X_test, Y_test)
         return X_train, Y_train, X_test, Y_test
 
-
-def load_mnist_binary():
-    return load_dataset('mnist_binary')
+############################################ CHANGED THIS ############################################
+# def load_mnist_binary():
+#     return load_dataset('mnist_binary')
+############################################ CHANGED THIS ############################################
 
 
 def load_attack(dataset_name, file_name):
     file_root, ext = os.path.splitext(file_name)
 
-    if ext == '.mat':
-        return load_attack_mat(dataset_name, file_name)
-    elif ext == '.npz':
+    ############################################ CHANGED THIS ############################################
+    # if ext == '.mat':
+    #     return load_attack_mat(dataset_name, file_name)
+    ############################################ CHANGED THIS ############################################
+    if ext == '.npz':
         return load_attack_npz(dataset_name, file_name)
     # else:
     #     raise ValueError, 'File extension must be .mat or .npz.'
 
+############################################ CHANGED THIS ############################################
+# def load_attack_mat(dataset_name, file_name, take_path=False):
+    # if take_path:
+    #     file_path = file_name
+    # else:
+    #     file_path = os.path.join(OUTPUT_FOLDER, dataset_name, file_name)
+    # f = sio.loadmat(file_path)
 
-def load_attack_mat(dataset_name, file_name, take_path=False):
-    if take_path:
-        file_path = file_name
-    else:
-        file_path = os.path.join(OUTPUT_FOLDER, dataset_name, file_name)
-    f = sio.loadmat(file_path)
+    # X_poison = f['X_attack_best']
+    # Y_poison = f['y_attack_best'].reshape(-1)
+    # X_train, Y_train, X_test, Y_test = load_dataset(dataset_name)
 
-    X_poison = f['X_attack_best']
-    Y_poison = f['y_attack_best'].reshape(-1)
-    X_train, Y_train, X_test, Y_test = load_dataset(dataset_name)
+    # if not sparse.issparse(X_train):
+    #     if sparse.issparse(X_poison):
+    #         print('Warning: X_train is not sparse but X_poison is sparse. Densifying X_poison...')
+    #         X_poison = X_poison.toarray()
 
-    if not sparse.issparse(X_train):
-        if sparse.issparse(X_poison):
-            print('Warning: X_train is not sparse but X_poison is sparse. Densifying X_poison...')
-            X_poison = X_poison.toarray()
+    # for X in [X_train, X_poison, X_test]:
+    #     if sparse.issparse(X): X = X.tocsr()
 
-    for X in [X_train, X_poison, X_test]:
-        if sparse.issparse(X): X = X.tocsr()
+    # if sparse.issparse(X_train):
+    #     X_modified = sparse.vstack((X_train, X_poison), format='csr')
+    # else:
+    #     X_modified = np.concatenate((X_train, X_poison), axis=0)
 
-    if sparse.issparse(X_train):
-        X_modified = sparse.vstack((X_train, X_poison), format='csr')
-    else:
-        X_modified = np.concatenate((X_train, X_poison), axis=0)
+    # Y_modified = np.concatenate((Y_train, Y_poison), axis=0)
 
-    Y_modified = np.concatenate((Y_train, Y_poison), axis=0)
+    # # Create views into X_modified so that we don't have to keep copies lying around
+    # num_train = np.shape(X_train)[0]
+    # idx_train = slice(0, num_train)
+    # idx_poison = slice(num_train, np.shape(X_modified)[0])
+    # X_train = X_modified[idx_train, :]
+    # Y_train = Y_modified[idx_train]
+    # X_poison = X_modified[idx_poison, :]
+    # Y_poison = Y_modified[idx_poison]
 
-    # Create views into X_modified so that we don't have to keep copies lying around
-    num_train = np.shape(X_train)[0]
-    idx_train = slice(0, num_train)
-    idx_poison = slice(num_train, np.shape(X_modified)[0])
-    X_train = X_modified[idx_train, :]
-    Y_train = Y_modified[idx_train]
-    X_poison = X_modified[idx_poison, :]
-    Y_poison = Y_modified[idx_poison]
+    # check_orig_data(X_train, Y_train, X_test, Y_test)
+    # check_poisoned_data(X_train, Y_train, X_poison, Y_poison, X_modified, Y_modified)
 
-    check_orig_data(X_train, Y_train, X_test, Y_test)
-    check_poisoned_data(X_train, Y_train, X_poison, Y_poison, X_modified, Y_modified)
-
-    return X_modified, Y_modified, X_test, Y_test, idx_train, idx_poison
-
+    # return X_modified, Y_modified, X_test, Y_test, idx_train, idx_poison
+############################################ CHANGED THIS ############################################
 
 def load_attack_npz(dataset_name, file_name, take_path=False):
     if take_path:
@@ -281,21 +326,21 @@ def load_attack_npz(dataset_name, file_name, take_path=False):
 
     if 'X_modified' in f:
         raise AssertionError
-        X_modified = f['X_modified']
-        Y_modified = f['Y_modified']
-        X_test = f['X_test']
-        Y_test = f['Y_test']
-        idx_train = f['idx_train'].reshape(1)[0]
-        idx_poison = f['idx_poison'].reshape(1)[0]
-        # Extract sparse array from array wrapper
-        if dataset_name in ['enron', 'imdb']:
-            X_modified = X_modified.reshape(1)[0]
-            X_test = X_test.reshape(1)[0]
+        # X_modified = f['X_modified']
+        # Y_modified = f['Y_modified']
+        # X_test = f['X_test']
+        # Y_test = f['Y_test']
+        # idx_train = f['idx_train'].reshape(1)[0]
+        # idx_poison = f['idx_poison'].reshape(1)[0]
+        # # Extract sparse array from array wrapper
+        # if dataset_name in ['enron', 'imdb']:
+        #     X_modified = X_modified.reshape(1)[0]
+        #     X_test = X_test.reshape(1)[0]
 
-        X_train = X_modified[idx_train, :]
-        Y_train = Y_modified[idx_train]
-        X_poison = X_modified[idx_poison, :]
-        Y_poison = Y_modified[idx_poison]
+        # X_train = X_modified[idx_train, :]
+        # Y_train = Y_modified[idx_train]
+        # X_poison = X_modified[idx_poison, :]
+        # Y_poison = Y_modified[idx_poison]
 
     # Loading KKT attacks, including targeted ones
     elif 'X_poison' in f:
@@ -324,30 +369,30 @@ def load_attack_npz(dataset_name, file_name, take_path=False):
     # This is for loading the baselines
     else:
         raise AssertionError
-        X_modified = f['poisoned_X_train']
-        if dataset_name in ['enron', 'imdb']:
-            try:
-                X_modified = X_modified.reshape(1)[0]
-            except:
-                pass
+        # X_modified = f['poisoned_X_train']
+        # if dataset_name in ['enron', 'imdb']:
+        #     try:
+        #         X_modified = X_modified.reshape(1)[0]
+        #     except:
+        #         pass
 
-        Y_modified = f['Y_train']
+        # Y_modified = f['Y_train']
 
-        X_train, Y_train, X_test, Y_test = load_dataset(dataset_name)
+        # X_train, Y_train, X_test, Y_test = load_dataset(dataset_name)
 
-        idx_train = slice(0, X_train.shape[0])
-        idx_poison = slice(X_train.shape[0], X_modified.shape[0])
+        # idx_train = slice(0, X_train.shape[0])
+        # idx_poison = slice(X_train.shape[0], X_modified.shape[0])
 
-        if sparse.issparse(X_modified):
-            assert((X_modified[idx_train, :] - X_train).nnz == 0)
-        else:
-            if sparse.issparse(X_train):
-                X_train = X_train.toarray()
-                X_test = X_test.toarray()
-            assert(np.all(np.isclose(X_modified[idx_train, :], X_train)))
-        assert(np.all(Y_modified[idx_train] == Y_train))
-        X_poison = X_modified[idx_poison, :]
-        Y_poison = Y_modified[idx_poison]
+        # if sparse.issparse(X_modified):
+        #     assert((X_modified[idx_train, :] - X_train).nnz == 0)
+        # else:
+        #     if sparse.issparse(X_train):
+        #         X_train = X_train.toarray()
+        #         X_test = X_test.toarray()
+        #     assert(np.all(np.isclose(X_modified[idx_train, :], X_train)))
+        # assert(np.all(Y_modified[idx_train] == Y_train))
+        # X_poison = X_modified[idx_poison, :]
+        # Y_poison = Y_modified[idx_poison]
 
     check_orig_data(X_train, Y_train, X_test, Y_test)
     check_poisoned_data(X_train, Y_train, X_poison, Y_poison, X_modified, Y_modified)

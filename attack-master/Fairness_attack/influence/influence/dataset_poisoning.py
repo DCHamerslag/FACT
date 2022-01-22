@@ -1,8 +1,12 @@
-import IPython
+############################################ CHANGED THIS ############################################
+# import IPython
+############################################ CHANGED THIS ############################################
 import numpy as np
 
 import os
-import time
+############################################ CHANGED THIS ############################################
+# import time
+############################################ CHANGED THIS ############################################
 from shutil import copyfile
 
 from .inceptionModel import BinaryInceptionModel
@@ -10,7 +14,9 @@ from .binaryLogisticRegressionWithLBFGS import BinaryLogisticRegressionWithLBFGS
 import experiments
 from .dataset import DataSet
 
-import tensorflow as tf
+############################################ CHANGED THIS ############################################
+# import tensorflow as tf
+############################################ CHANGED THIS ############################################
 
 from tensorflow.contrib.learn.python.learn.datasets import base
 

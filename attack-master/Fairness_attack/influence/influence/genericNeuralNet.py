@@ -3,18 +3,30 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals  
 
-import abc
-import sys
+############################################ CHANGED THIS ############################################
+# import abc
+# import sys
+############################################ CHANGED THIS ############################################
 
-import IPython
+""" Our imports """
+import os
+import csv
+
+############################################ CHANGED THIS ############################################
+# import IPython
+############################################ CHANGED THIS ############################################
 
 import numpy as np
-import pandas as pd
-from sklearn import linear_model, preprocessing, cluster
+############################################ CHANGED THIS ############################################
+# import pandas as pd
+# from sklearn import linear_model, preprocessing, cluster
+############################################ CHANGED THIS ############################################
 
-import scipy.linalg as slin
-import scipy.sparse.linalg as sparselin
-import scipy.sparse as sparse
+############################################ CHANGED THIS ############################################
+# import scipy.linalg as slin
+# import scipy.sparse.linalg as sparselin
+# import scipy.sparse as sparse
+############################################ CHANGED THIS ############################################
 from scipy.optimize import fmin_ncg
 
 import os.path
@@ -81,8 +93,10 @@ class GenericNeuralNet(object):
     """
 
     def __init__(self, **kwargs):
-        np.random.seed(0)
-        tf.set_random_seed(0)
+        ###################### CHANGED BY STUDENTS #######################
+        np.random.seed(0+self.rand_seed)
+        tf.set_random_seed(0+self.rand_seed)
+        ###################### CHANGED BY STUDENTS #######################
         
         self.batch_size = kwargs.pop('batch_size')
         self.data_sets = kwargs.pop('data_sets')
@@ -95,7 +109,11 @@ class GenericNeuralNet(object):
         self.attack_method = kwargs.pop('method')
         self.general_train_idx=kwargs.pop('general_train_idx')
         self.sensitive_file=kwargs.pop('sensitive_file')
+        ####### ADDED by students ########
+        self.original_data=kwargs.pop('original_data')
+        ##################################
 
+        
         if 'keep_probs' in kwargs: self.keep_probs = kwargs.pop('keep_probs')
         else: self.keep_probs = None
         
@@ -177,26 +195,36 @@ class GenericNeuralNet(object):
             self.grad_adversarial_loss_op = tf.gradients(self.adversarial_loss, self.params)
 
     def get_fairness_measures(self,art_poisoned_predicts_test,art_poisoned_predicts_train):
-        DATA_FOLDER = './data'
+        ########## ADDED by students ##########
+        if self.original_data == "yes" or self.original_data == "y":
+            DATA_FOLDER = './original_data' 
+        else:
+            DATA_FOLDER = './authors_data'
+        ######################################
+        print(DATA_FOLDER)
         dataset_path = os.path.join(DATA_FOLDER)
         f = np.load(os.path.join(dataset_path, self.sensitive_file))
         group_label = f['group_label']
         X_test = self.data_sets.test.x
         Y_test = self.data_sets.test.labels
         X_train  = self.data_sets.train.x
-        Y_train = self.data_sets.train.labels
+        ############################################ CHANGED THIS ############################################
+        # Y_train = self.data_sets.train.labels
+        # n_train = X_train.shape[0]
+        # n_test = X_test.shape[0]
+        ############################################ CHANGED THIS ############################################
 
-        n_train = X_train.shape[0]
-        n_test = X_test.shape[0]
-
+        """ Our variable to save the results """
+        dict__ = dict()
 
         index_male_test = np.where(group_label[self.general_train_idx:] == 0)[0].astype(np.int32)
         index_female_test = np.where(group_label[self.general_train_idx:] == 1)[0].astype(np.int32)
-        index_male_true_test = np.where(np.logical_and(group_label[self.general_train_idx:] == 0, Y_test==1))[0].astype(np.int32)
-        index_male_false_test = np.where(np.logical_and(group_label[self.general_train_idx:] == 0, Y_test==-1))[0].astype(np.int32)
-        index_female_true_test = np.where(np.logical_and(group_label[self.general_train_idx:] == 1, Y_test==1))[0].astype(np.int32)
-        index_female_false_test = np.where(np.logical_and(group_label[self.general_train_idx:] == 1, Y_test==-1))[0].astype(np.int32)
-
+        ############################################ CHANGED THIS ############################################
+        # index_male_true_test = np.where(np.logical_and(group_label[self.general_train_idx:] == 0, Y_test==1))[0].astype(np.int32)
+        # index_male_false_test = np.where(np.logical_and(group_label[self.general_train_idx:] == 0, Y_test==-1))[0].astype(np.int32)
+        # index_female_true_test = np.where(np.logical_and(group_label[self.general_train_idx:] == 1, Y_test==1))[0].astype(np.int32)
+        # index_female_false_test = np.where(np.logical_and(group_label[self.general_train_idx:] == 1, Y_test==-1))[0].astype(np.int32)
+        ############################################ CHANGED THIS ############################################      
 
         poi_test_hat_one = np.where(art_poisoned_predicts_test[:,0] == 1)[0].astype(np.int32)
         poi_test_hat_zero = np.where(art_poisoned_predicts_test[:,0] == -1)[0].astype(np.int32)
@@ -218,14 +246,69 @@ class GenericNeuralNet(object):
         b_female_test = (test_female_zero_prediction.shape[0]/poi_test_hat_zero.shape[0])*poi_test_y_one_hat_zero
         b_male_test = (test_male_zero_prediction.shape[0]/poi_test_hat_zero.shape[0])*poi_test_y_one_hat_zero
 
-        c_female_test = (test_female_one_prediction.shape[0]/poi_test_hat_one.shape[0])*poi_test_y_zero_hat_one
-        c_male_test = (test_male_one_prediction.shape[0]/poi_test_hat_one.shape[0])*poi_test_y_zero_hat_one
+        ############################################ CHANGED THIS ############################################
+        # c_female_test = (test_female_one_prediction.shape[0]/poi_test_hat_one.shape[0])*poi_test_y_zero_hat_one
+        # c_male_test = (test_male_one_prediction.shape[0]/poi_test_hat_one.shape[0])*poi_test_y_zero_hat_one
 
-        d_female_test = (test_female_zero_prediction.shape[0]/poi_test_hat_zero.shape[0])*poi_test_y_zero_hat_zero
-        d_male_test = (test_male_zero_prediction.shape[0]/poi_test_hat_zero.shape[0])*poi_test_y_zero_hat_zero
+        # d_female_test = (test_female_zero_prediction.shape[0]/poi_test_hat_zero.shape[0])*poi_test_y_zero_hat_zero
+        # d_male_test = (test_male_zero_prediction.shape[0]/poi_test_hat_zero.shape[0])*poi_test_y_zero_hat_zero
+        ############################################ CHANGED THIS ############################################
 
 
         print("******************Poison model EO bias on Test" + str ( abs( (a_female_test/(a_female_test+b_female_test)) - (a_male_test/(a_male_test+b_male_test)) )) )
+
+        ############################################ ADDED BY STUDENTS ###########################################
+        """"Our extension to save the results """
+
+        # save each iteration in dict__
+        dict__["parity"] = abs( (test_female_one_prediction.shape[0]/index_female_test.shape[0]) - (test_male_one_prediction.shape[0]/index_male_test.shape[0])  ) 
+        dict__["EO bias"] = abs( (a_female_test/(a_female_test+b_female_test)) - (a_male_test/(a_male_test+b_male_test)))
+
+        if not os.path.isdir("./{}".format("results")):
+            os.mkdir("./{}".format("results"))
+
+        # add seed to file name
+        if self.original_data == "yes" or self.original_data == "y":
+            dataset_choice = "Original data" + " seed {}".format(self.rand_seed)
+        else:
+            dataset_choice = "Authors data" + " seed {}".format(self.rand_seed)
+
+        if not os.path.isdir("./{}/{}".format("results", dataset_choice)):
+            os.mkdir("./{}/{}".format("results", dataset_choice))
+
+        # make path name to folder (results/ original or authors data/ dataset name)
+        dataset_namee = [i for i in self.model_name.split("_") if i in ["german", "drug", "compas"]][0]
+
+        # make folder if it does not exist
+        if not os.path.isdir("./{}/{}/{}".format("results", dataset_choice, dataset_namee)):
+            os.mkdir("./{}/{}/{}".format("results", dataset_choice, dataset_namee))
+
+        # just a placeholder
+        pb_placeholder = "parities and biases"
+
+        # make folder if it does not exist
+        if not os.path.isdir("./{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, pb_placeholder)):
+            os.mkdir("./{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, pb_placeholder))
+
+        # save parity and EO bias of each iteration for each epsilon in the concerning folder
+        csv_columns = ['parity','EO bias']
+        csv_file_name = '{}-{}.csv'.format(self.attack_method, self.model_name)
+        path_to_csv = "./{}/{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, pb_placeholder, csv_file_name)
+        if not os.path.isfile(path_to_csv):
+            try:
+                with open(path_to_csv, 'a') as csvfile:
+                    writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+                    writer.writeheader()
+
+                    writer.writerow(dict__)
+            except IOError:
+                print("I/O error")
+        else:
+            with open(path_to_csv, 'a') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+                writer.writerow(dict__)
+        ############################################ ADDED BY STUDENTS ###########################################
+
     def get_vec_to_list_fn(self):
         params_val = self.sess.run(self.params)
         self.num_params = len(np.concatenate(params_val))        
@@ -395,6 +478,57 @@ class GenericNeuralNet(object):
             'grad_norm': grad_norm,
             'params_norm': params_norm
         }
+
+        ############################################ ADDED BY STUDENTS ###########################################
+        """"Our extension to save the results """
+        # save each iteration in dict res
+        res = {"test_acc": test_acc_val}
+
+        if not os.path.isdir("./{}".format("results")):
+            os.mkdir("./{}".format("results"))
+
+        # add random seed to folder name
+        if self.original_data == "yes" or self.original_data == "y":
+            dataset_choice = "Original data" + " seed {}".format(self.rand_seed)
+        else:
+            dataset_choice = "Authors data" + " seed {}".format(self.rand_seed)
+
+        if not os.path.isdir("./{}/{}".format("results", dataset_choice)):
+            os.mkdir("./{}/{}".format("results", dataset_choice))
+
+        # make path name to folder (results/ original or authors data/ dataset name)
+        dataset_namee = [i for i in self.model_name.split("_") if i in ["german", "drug", "compas"]][0] 
+
+        # make folder if it does not exist
+        if not os.path.isdir("./{}/{}/{}".format("results", dataset_choice, dataset_namee)):
+            os.mkdir("./{}/{}/{}".format("results", dataset_choice, dataset_namee))
+
+        # just a placeholder
+        test_accs = "test_accs"
+
+        # make folder if it does not exist
+        if not os.path.isdir("./{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, test_accs)):
+            os.mkdir("./{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, test_accs))
+
+        # save test_accuracy of each iteration for each epsilon in the concerning folder
+        csv_columns = ['test_acc']
+        csv_file_name = '{}-{}.csv'.format(self.attack_method, self.model_name)
+        path_to_csv = "./{}/{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, test_accs, csv_file_name)
+        if not os.path.isfile(path_to_csv):
+            try:
+                with open(path_to_csv, 'a') as csvfile:
+                    writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+                    writer.writeheader()
+
+                    writer.writerow(res)
+            except IOError:
+                print("I/O error")
+        else:
+            with open(path_to_csv, 'a') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+                writer.writerow(res)
+        
+        ##########################################################################################################
 
         return results
 

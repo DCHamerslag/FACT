@@ -40,19 +40,21 @@ def get_centroid_vec(centroids):
     centroid_vec = np.reshape(centroid_vec, (1, -1))
     return centroid_vec
 
-# Can speed this up if necessary
-def get_sqrt_inv_cov(X, Y, class_map):
-    num_classes = len(set(Y))
-    num_features = X.shape[1]
-    sqrt_inv_covs = np.zeros((num_classes, num_features, num_features))
+############################################ CHANGED THIS ############################################
+# # Can speed this up if necessary
+# def get_sqrt_inv_cov(X, Y, class_map):
+#     num_classes = len(set(Y))
+#     num_features = X.shape[1]
+#     sqrt_inv_covs = np.zeros((num_classes, num_features, num_features))
 
-    for y in set(Y):
-        cov = np.cov(X[Y == y, :], rowvar=False)
-        U_cov, S_cov, _ = np.linalg.svd(cov + 1e-6 * np.eye(num_features))
-        print('    min eigenvalue of cov after 1e-6 reg is %s' % np.min(S_cov))
-        sqrt_inv_covs[class_map[y], ...] = U_cov.dot(np.diag(1 / np.sqrt(S_cov)).dot(U_cov.T))
+#     for y in set(Y):
+#         cov = np.cov(X[Y == y, :], rowvar=False)
+#         U_cov, S_cov, _ = np.linalg.svd(cov + 1e-6 * np.eye(num_features))
+#         print('    min eigenvalue of cov after 1e-6 reg is %s' % np.min(S_cov))
+#         sqrt_inv_covs[class_map[y], ...] = U_cov.dot(np.diag(1 / np.sqrt(S_cov)).dot(U_cov.T))
 
-    return sqrt_inv_covs
+#     return sqrt_inv_covs
+############################################ CHANGED THIS ############################################
 
 # Can speed this up if necessary
 def get_data_params(X, Y, percentile):
@@ -111,70 +113,72 @@ def add_points(x, y, X, Y, num_copies=1):
     Y_modified = np.append(Y, np.tile(y, num_copies))
     return X_modified, Y_modified
 
+############################################ CHANGED THIS ############################################
+# def copy_random_points(X, Y, mask_to_choose_from=None, target_class=1, num_copies=1,
+#                        random_seed=18, replace=False):
+#     # Only copy from points where mask_to_choose_from == True
 
-def copy_random_points(X, Y, mask_to_choose_from=None, target_class=1, num_copies=1,
-                       random_seed=18, replace=False):
-    # Only copy from points where mask_to_choose_from == True
+#     np.random.seed(random_seed)
+#     combined_mask = (np.array(Y, dtype=int) == target_class)
+#     if mask_to_choose_from is not None:
+#         combined_mask = combined_mask & mask_to_choose_from
 
-    np.random.seed(random_seed)
-    combined_mask = (np.array(Y, dtype=int) == target_class)
-    if mask_to_choose_from is not None:
-        combined_mask = combined_mask & mask_to_choose_from
+#     idx_to_copy = np.random.choice(
+#         np.where(combined_mask)[0],
+#         size=num_copies,
+#         replace=replace)
 
-    idx_to_copy = np.random.choice(
-        np.where(combined_mask)[0],
-        size=num_copies,
-        replace=replace)
+#     if sparse.issparse(X):
+#         X_modified = sparse.vstack((X, X[idx_to_copy, :]))
+#     else:
+#         X_modified = np.append(X, X[idx_to_copy, :], axis=0)
+#     Y_modified = np.append(Y, Y[idx_to_copy])
+#     return X_modified, Y_modified
+############################################ CHANGED THIS ############################################
 
-    if sparse.issparse(X):
-        X_modified = sparse.vstack((X, X[idx_to_copy, :]))
-    else:
-        X_modified = np.append(X, X[idx_to_copy, :], axis=0)
-    Y_modified = np.append(Y, Y[idx_to_copy])
-    return X_modified, Y_modified
+############################################ CHANGED THIS ############################################
+# def threshold(X):
+#     return np.clip(X, 0, np.max(X))
+############################################ CHANGED THIS ############################################
 
+############################################ CHANGED THIS ############################################
+# def rround(X, random_seed=3, return_sparse=True):
+#     if sparse.issparse(X):
+#         X = X.toarray()
 
-def threshold(X):
-    return np.clip(X, 0, np.max(X))
-
-
-def rround(X, random_seed=3, return_sparse=True):
-    if sparse.issparse(X):
-        X = X.toarray()
-
-    X_frac, X_int = np.modf(X)
-    X_round = X_int + (np.random.random_sample(X.shape) < X_frac)
-    if return_sparse:
-        return sparse.csr_matrix(X_round)
-    else:
-        return X_round
+#     X_frac, X_int = np.modf(X)
+#     X_round = X_int + (np.random.random_sample(X.shape) < X_frac)
+#     if return_sparse:
+#         return sparse.csr_matrix(X_round)
+#     else:
+#         return X_round
 
 
-def rround_with_repeats(X, Y, repeat_points, random_seed=3, return_sparse=True):
+# def rround_with_repeats(X, Y, repeat_points, random_seed=3, return_sparse=True):
 
-    X_round = rround(X, random_seed=random_seed, return_sparse=return_sparse)
+#     X_round = rround(X, random_seed=random_seed, return_sparse=return_sparse)
 
-    assert Y.shape[0] == X.shape[0]
+#     assert Y.shape[0] == X.shape[0]
 
-    if repeat_points > 1:
-        pos_idx = 0
-        neg_idx = 0
-        for i in range(X_round.shape[0]):
-            if Y[i] == 1:
-                if pos_idx % repeat_points == 0:
-                    last_pos_x = X_round[i, :]
-                else:
-                    X_round[i, :] = last_pos_x
-                pos_idx += 1
-            else:
-                if neg_idx % repeat_points == 0:
-                    last_neg_x = X_round[i, :]
-                else:
-                    X_round[i, :] = last_neg_x
-                neg_idx += 1
+#     if repeat_points > 1:
+#         pos_idx = 0
+#         neg_idx = 0
+#         for i in range(X_round.shape[0]):
+#             if Y[i] == 1:
+#                 if pos_idx % repeat_points == 0:
+#                     last_pos_x = X_round[i, :]
+#                 else:
+#                     X_round[i, :] = last_pos_x
+#                 pos_idx += 1
+#             else:
+#                 if neg_idx % repeat_points == 0:
+#                     last_neg_x = X_round[i, :]
+#                 else:
+#                     X_round[i, :] = last_neg_x
+#                 neg_idx += 1
 
-    return X_round
-
+#     return X_round
+############################################ CHANGED THIS ############################################
 
 def project_onto_sphere(X, Y, radii, centroids, class_map):
 
