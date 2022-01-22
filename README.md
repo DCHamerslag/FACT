@@ -36,24 +36,24 @@ institution = "University of California, Irvine, School of Information and Compu
 
 # Tested Environment
 The code was tested in the environment provided by the authors. The following requirements would work:  
-Python 3.6
-PIP 20.3.1
-setuptools 19.2 (in most of the cases you have to downgrade)
-Tensorflow 1.12.3
-scikit-learn 0.23.1  
-tensorboard 1.12.2
-cvxpy 0.4.11 [cvxpy 1.0+ is not backwards compatible, therefore the downgrade of setuptools]
-CVXcanon 0.1.1  
-scs 2.1.2
-scipy 1.1.0  
-numpy 1.16.2
-pandas 1.1.4  
-Matplotlib 3.3.3  
-tabulate 0.8.9
-seaborn 0.11.0  
-tqdm 4.62.3
-IPython 7.16.1
-pillow 8.0.1
+- Python 3.6
+- PIP 20.3.1
+- setuptools 19.2 (in most of the cases you have to downgrade)
+- Tensorflow 1.12.3
+- scikit-learn 0.23.1  
+- tensorboard 1.12.2
+- cvxpy 0.4.11 [cvxpy 1.0+ is not backwards compatible, therefore the downgrade of setuptools]
+- CVXcanon 0.1.1  
+- scs 2.1.2
+- scipy 1.1.0  
+- numpy 1.16.2
+- pandas 1.1.4  
+- Matplotlib 3.3.3  
+- tabulate 0.8.9
+- seaborn 0.11.0  
+- tqdm 4.62.3
+- IPython 7.16.1
+- pillow 8.0.1
 
 
 # Running Instructions
@@ -82,7 +82,7 @@ We have added four folders in main folder Fairness_attack:
 - authors_data: which is the data provided by the authors.
 - original_data: which consists of a resources folder that contains the original raw data. To try and reproduce the results of the authors, a file named make_datasets.py is automatically called if --original_data y is included in the run. The process of reproducing the datasets, is covered in the next folder.
 - reverse_engineering: which also consists of the data provided by the authors as well as the original raw data. The Datasets - reverse_engineering notebook is there to show our reverse_engineering process and how we managed to create the same datasets by performing different operations and transformations.
-- results: which consists of a plot_results.py file and a notebook with the same code. The first can only be called in the command if and only if all the attacks have been run with 10 epsilons varying from 0.1 up to 1 (explained later on in this file as well as in our paper). The notebook is there if one does not want to plot the results immediately after running. 
+- results: which consists of a plot_results.py file and a notebook with the same code. The first can only be called in the command if and only if all the attacks have been run with 10 epsilons varying from 0.1 up to 1 (explained later on in this file as well as in our paper). The notebook is there if one does not want to plot the results immediately after running.
 
 
 Furthermore, for convenience, we set the **position of the sensitive feature at the start of each original dataset, thus sensitive_feature_idx is always 0**, if --original_data y.
@@ -105,4 +105,4 @@ x; x; x; x; x; x; x; x; x; x; y; y; y; y; y; y; y; y; y; y; z; z; z; z; z; z; z;
 
 For the authors german dataset this will produce and automatically plot the following image (with the default seed).
 To generate the dataframe, you can make sure to print the dataframe specified at the bottom of the function plot_seed() in the plot_results.py file:
-![](../../authors_data_seed_0-german.png)
+![](attack-master/authors_data_seed_0-german.png)
