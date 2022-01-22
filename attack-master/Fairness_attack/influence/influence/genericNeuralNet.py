@@ -27,7 +27,7 @@ from tensorflow.contrib.learn.python.learn.datasets import base
 
 from .hessians import hessian_vector_product
 from .dataset import DataSet
-
+import torch
 
 def variable(name, shape, initializer):
     dtype = tf.float32
