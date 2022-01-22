@@ -78,7 +78,7 @@ We have added three parameters:
 - --rand_seed: which is by default 0. This one should be a natural value (ℕ), i.e. a non-negative integer. However, a value ∈ {0,1,2,3} is recommended, since this value is added to the seeds already implemented by the authors.
 - --plot_results: which is by default no. **This one only works if and only if the chosen dataset has been run for all three attacks with the ten epsilons from 0.1 to 1.** Thus this one can only be --plot_results y if all attacks have already been run with the ten epsilons (3 * 10) or if one runs multiple commands with a ; in between. Then the last command can include --plot_results y (explained at the bottom).
 
-We have added four folders in main folder Fairness_attack:
+We have added four folders in the main folder Fairness_attack:
 - authors_data: which is the data provided by the authors.
 - original_data: which consists of a resources folder that contains the original raw data. To try and reproduce the results of the authors, a file named make_datasets.py is automatically called if --original_data y is included in the run. The process of reproducing the datasets, is covered in the next folder.
 - reverse_engineering: which also consists of the data provided by the authors as well as the original raw data. The Datasets - reverse_engineering notebook is there to show our reverse_engineering process and how we managed to create the same datasets by performing different operations and transformations.
@@ -89,13 +89,13 @@ Furthermore, for convenience, we set the **position of the sensitive feature at 
 
 To run IAF for the original german dataset (--original_data y and --sensitive_feature_idx 0):
 ```bash
-python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset german --use_slab --sensitive_feature_idx 0 --sensitive_attr_filename german_group_label.npz --method IAF --epsilon 0.1 --original_y
+python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset german --use_slab --sensitive_feature_idx 0 --sensitive_attr_filename german_group_label.npz --method IAF --epsilon 0.1 --original_data y
 ```
 
 
 To run the same example above with a different seed (+1 on the seeds implemented by the authors):
 ```bash
-python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset german --use_slab --sensitive_feature_idx 0 --sensitive_attr_filename german_group_label.npz --method IAF --epsilon 0.1 --original_y --rand_seed 1
+python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset german --use_slab --sensitive_feature_idx 0 --sensitive_attr_filename german_group_label.npz --method IAF --epsilon 0.1 --original_data y --rand_seed 1
 ```
 
 In case one wants to **run all three attacks with all epsilons between [0,1]**, the same line can be run multiple times in succession with a ; between the lines. On the last line --plot_results y is acceptable in this case (3 * 10) have already been run then. To give an example, let's define x as the previous command with attack method IAF and each time a different epsilon, y as the previous command with attack method RAA and each time a different epsilon and z as again the previous command with attack method NRAA and each time a different epsilon. Then we can run all the commands at once, with the --plot_results y included in the last command.
