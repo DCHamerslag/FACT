@@ -132,3 +132,4 @@ dmypy.json
 .DS_Store
 attack-master/Fairness_attack/output/german/influence_data/
 attack-master/Fairness_attack/environment.yml
+attack-master/Fairness_attack/output/
