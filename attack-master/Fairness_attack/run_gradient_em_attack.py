@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import os
 ############################################ CHANGED THIS ############################################
-# import json
 import csv
 import glob
 ############################################ CHANGED THIS ############################################
@@ -18,12 +17,8 @@ import scipy.sparse as sparse
 import data_utils as data
 import datasets
 from results.plot_results import plot_seed
-############################################ CHANGED THIS ############################################
-# import upper_bounds
-# import defenses
-############################################ CHANGED THIS ############################################
+
 import iterative_attack
-from upper_bounds import hinge_loss, hinge_grad, logistic_grad
 from influence.influence.smooth_hinge import SmoothHinge
 from influence.influence.dataset import DataSet
 from tensorflow.contrib.learn.python.learn.datasets import base
@@ -44,26 +39,7 @@ def get_projection_fn_for_dataset(dataset_name, X, Y, use_slab, use_LP, percenti
             less_than_one=False,
             use_lp_rounding=use_LP,
             percentile=percentile)
-    ############################################ CHANGED THIS ############################################
-    # elif dataset_name in ['mnist_17']:
-    #     projection_fn = data.get_projection_fn(
-    #         X, Y,
-    #         sphere=True,
-    #         slab=use_slab,
-    #         non_negative=True,
-    #         less_than_one=True,
-    #         use_lp_rounding=False,
-    #         percentile=percentile)
-    # elif dataset_name in ['dogfish']:
-    #     projection_fn = data.get_projection_fn(
-    #         X, Y,
-    #         sphere=True,
-    #         slab=use_slab,
-    #         non_negative=False,
-    #         less_than_one=False,
-    #         use_lp_rounding=False,
-    #         percentile=percentile)
-    ############################################ CHANGED THIS ############################################
+
     return projection_fn
 
 fit_intercept = True
@@ -125,9 +101,6 @@ plot_results = args.plot_results
 plot_results = plot_results.lower()
 ####################################################################################################
 
-output_root = os.path.join(datasets.OUTPUT_FOLDER, dataset_name, 'influence_data')
-datasets.safe_makedirs(output_root)
-
 if(attack_method == "IAF"):
     loss_type ='adversarial_loss'
 else:
@@ -136,14 +109,6 @@ else:
 print('epsilon: %s' % epsilon)
 print('use_slab: %s' % use_slab)
 
-############################################ CHANGED THIS ############################################
-# if dataset_name == 'enron':
-#     weight_decay = 0.09
-# elif dataset_name == 'mnist_17':
-#     weight_decay = 0.01
-# elif dataset_name == 'dogfish':
-#     weight_decay = 1.1
-#######################################################################################################
 if dataset_name == 'german':
     weight_decay = 0.09
 elif dataset_name == 'compas':
@@ -187,6 +152,21 @@ if no_LP:
     model_name = model_name + '_no-LP'
 if timed:
     model_name = model_name + '_timed'
+
+# add seed to folder name
+if original_data == "yes" or original_data == "y":
+    dataset_choice = "Original data" + " seed {}".format(rand_seed)
+else:
+    dataset_choice = "Authors data" + " seed {}".format(rand_seed)
+    
+# make path name to folder (results/ original or authors data/ dataset name)
+dataset_namee = [i for i in model_name.split("_") if i in ["german", "drug", "compas"]][0] 
+
+# make folder if it does not exist
+output_root = os.path.join(".", "{}".format("output"), "{}".format(dataset_choice), "{}".format(dataset_namee))
+
+# output_root = os.path.join(datasets.OUTPUT_FOLDER, dataset_name, 'influence_data')
+datasets.safe_makedirs(output_root)
 
 if max_em_iter == 0:
     num_grad_iter_per_em = total_grad_iter
@@ -374,36 +354,38 @@ total_time = {"time_taken_seconds": time_end - time_start}
 
 """"Our extension to save the time taken """
 
-if not os.path.isdir("./{}".format("results")):
-    os.mkdir("./{}".format("results"))
+if not os.path.isdir(os.path.join(".", "{}".format("results"))):
+    os.mkdir(os.path.join(".", "{}".format("results")))
 
 # add seed to folder name
 if original_data == "yes" or original_data == "y":
     dataset_choice = "Original data" + " seed {}".format(rand_seed)
 else:
     dataset_choice = "Authors data" + " seed {}".format(rand_seed)
+    
 
-if not os.path.isdir("./{}/{}".format("results", dataset_choice)):
-    os.mkdir("./{}/{}".format("results", dataset_choice))
-
+if not os.path.isdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice))):
+    os.mkdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice)))
+    
 # make path name to folder (results/ original or authors data/ dataset name)
 dataset_namee = [i for i in model_name.split("_") if i in ["german", "drug", "compas"]][0] 
 
 # make folder if it does not exist
-if not os.path.isdir("./{}/{}/{}".format("results", dataset_choice, dataset_namee)):
-    os.mkdir("./{}/{}/{}".format("results", dataset_choice, dataset_namee))
+if not os.path.isdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice), "{}".format(dataset_namee))):
+    os.mkdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice), "{}".format(dataset_namee)))
 
 # just a placeholder
 time_and_it = "time_and_it"
 
+last_path = os.path.join(".", "{}".format("results"), "{}".format(dataset_choice), "{}".format(dataset_namee), "{}".format(time_and_it))
 # make folder if it does not exist
-if not os.path.isdir("./{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, time_and_it)):
-    os.mkdir("./{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, time_and_it))
+if not os.path.isdir(last_path):
+    os.mkdir(last_path)
 
 # save time taken in seconds for each epsilon in the concerning folder
 csv_column = ['time_taken_seconds', 'iteration']
 csv_file_name = '{}-{}.csv'.format(attack_method, model_name)
-path_to_csv = "./{}/{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, time_and_it, csv_file_name)
+path_to_csv = os.path.join(last_path, csv_file_name)
 if not os.path.isfile(path_to_csv):
     try:
         with open(path_to_csv, 'a') as csvfile:
@@ -419,15 +401,17 @@ else:
         writer.writerow(total_time)
 
 # parameters for plotting results immediately after finish
-methods_list = ["/IAF-", "/RAA-", "/NRAA-"]
+methods_list = [os.path.join(" ", "IAF-").strip(),
+                os.path.join(" ", "RAA-").strip(),
+                os.path.join(" ", "NRAA-").strip()]
 folder_measures = ["test_accs", "parities and biases"]
 measures = ["test_acc", "parity", "EO bias"]
 time_and_it = "time_and_it"
 time_and_it_columns = ["time_taken_seconds", "iteration"]
 
 counter_glob = 0
-for i in glob.glob("./results/{}/{}/*".format(dataset_choice, dataset_namee)):
-    counter_glob += len(glob.glob("{}/*".format(i)))
+for i in glob.glob(os.path.join(".", "results", "{}".format(dataset_choice), "{}".format(dataset_namee), "*")):
+    counter_glob += len(glob.glob(os.path.join("{}".format(i), "*")))
 
 # if --plot_results yes, then plot results immediately after finish
 if plot_results == "y" or plot_results == "yes":
