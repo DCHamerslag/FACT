@@ -1,6 +1,5 @@
 """
-We made this file to plot the results, right after running the attacks if "y" or "yes" is filled in for the
-parameter --plot_results.
+We made this file to plot the results, right after running the attacks if the parameter --plot_results.
 """
 
 import glob
