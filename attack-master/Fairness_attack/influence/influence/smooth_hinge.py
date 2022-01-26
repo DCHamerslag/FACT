@@ -3,38 +3,13 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals  
 
-############################################ CHANGED THIS ############################################
-# import abc
-# import sys
-############################################ CHANGED THIS ############################################
-
 import numpy as np
-############################################ CHANGED THIS ############################################
-# import pandas as pd
-# from sklearn import linear_model, preprocessing, cluster, svm
-# import matplotlib.pyplot as plt
-# import seaborn as sns
-# import scipy.linalg as slin
-# import scipy.sparse.linalg as sparselin
-# import scipy.sparse as sparse 
 from sklearn import svm
 from scipy.optimize import fmin_ncg
-# from scipy.optimize import fmin_l_bfgs_b, fmin_cg, fmin_ncg
-############################################ CHANGED THIS ############################################
-
-
-############################################ CHANGED THIS ############################################
-# import os.path
-# import time
-# import IPython
-############################################ CHANGED THIS ############################################
 import tensorflow as tf
 import math
 
-############################################ CHANGED THIS ############################################
 from .genericNeuralNet import GenericNeuralNet, variable_with_weight_decay
-# from .genericNeuralNet import GenericNeuralNet, variable, variable_with_weight_decay
-############################################ CHANGED THIS ############################################
 
 def log_loss(x, t):
     exponents = -(x-1)/t
