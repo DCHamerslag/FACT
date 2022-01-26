@@ -4,16 +4,9 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import time
-
 import numpy as np
-
 from scipy.linalg import orth
 import scipy.sparse as sparse
-from sklearn import svm
-
-import data_utils as data
-import datasets
-
 import cvxpy as cvx
 
 def sigmoid(x):
@@ -251,18 +244,8 @@ class Minimizer(object):
             self.prob.solve(verbose=verbose, solver=cvx.SCS)
         except:
             raise
-            print('centroid', self.cvx_centroid.value)
-            print('centroid_vec', self.cvx_centroid_vec.value)
-            print('w', self.cvx_w.value)
-            print('sphere_radius', sphere_radius)
-            print('slab_radius', slab_radius)
-            if self.constrain_max_loss:
-                print('constraint_w', self.cvx_constraint_w.value)
-                print('constraint_b', self.cvx_constraint_b.value)
-
-            print('Resolving verbosely')
-            self.prob.solve(verbose=True, solver=cvx.SCS)
-            raise
+            ###### Added this ######
+            print("They do not do anything here.")
 
         x_opt = np.array(self.cvx_x.value).reshape(-1)
 
