@@ -9,9 +9,7 @@ import numpy as np
 import os
 import defenses
 import data_utils as data
-############################################ CHANGED THIS ############################################
-# import cvxpy as cvx
-# import tensorflow as tf
+############################################ ADDED THIS ############################################
 import csv
 ############################################ CHANGED THIS ############################################
 import random
@@ -39,6 +37,7 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
 
     if test_description is None:
         test_description = test_idx
+    
     grad_filename = os.path.join(output_root, 'grad_influence_wrt_input_val_%s_testidx_%s.npy' % (model.model_name, test_description))
 
     if (force_refresh == False) and (os.path.exists(grad_filename)):
@@ -64,9 +63,9 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
     if(attack_method == "RAA"):
         ######### ADDED BY STUDENTS #########
         if original_data == "yes" or original_data == "y":
-            DATA_FOLDER = "./original_data" 
+            DATA_FOLDER = os.path.join(".", "original_data")
         else:
-            DATA_FOLDER = "./authors_data"
+            DATA_FOLDER = os.path.join(".", "authors_data")
         #####################################
 
         dataset_path = os.path.join(DATA_FOLDER)
@@ -75,11 +74,6 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
 
         male_train_index=np.where(group_label[0:general_train_idx] == 0)[0].astype(np.int32)
         female_train_index=np.where(group_label[0:general_train_idx] == 1)[0].astype(np.int32)
-        ############################################ CHANGED THIS ############################################
-        # male_test_index= np.where(group_label[general_train_idx:] == 0)[0].astype(np.int32)
-        # female_test_index= np.where(group_label[general_train_idx:] == 1)[0].astype(np.int32)
-        ############################################ CHANGED THIS ############################################
-
 
         gender_labels = np.zeros(data_sets.train.labels.shape[0])
         for k in range(general_train_idx):
@@ -113,9 +107,9 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
     elif(attack_method == "NRAA"):
         ######### ADDED BY STUDENTS #########
         if original_data == "yes" or original_data == "y":
-            DATA_FOLDER = "./original_data" 
+            DATA_FOLDER = os.path.join(".", "original_data")
         else:
-            DATA_FOLDER = "./authors_data"
+            DATA_FOLDER = os.path.join(".", "authors_data")
         #####################################
 
         dataset_path = os.path.join(DATA_FOLDER)
@@ -124,10 +118,6 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
 
         male_train_index=np.where(group_label[0:general_train_idx] == 0)[0].astype(np.int32)
         female_train_index=np.where(group_label[0:general_train_idx] == 1)[0].astype(np.int32)
-        ############################################ CHANGED THIS ############################################
-        # male_test_index= np.where(group_label[general_train_idx:] == 0)[0].astype(np.int32)
-        # female_test_index= np.where(group_label[general_train_idx:] == 1)[0].astype(np.int32)
-        ############################################ CHANGED THIS ############################################
 
         gender_labels = np.zeros(data_sets.train.labels.shape[0])
         for k in range(general_train_idx):
@@ -314,6 +304,8 @@ def iterative_attack(
         print('attack_iter', attack_iter)
         print('num_iter - 1', num_iter - 1)
 
+        
+
         if ((attack_iter + 1) % 10 == 0) or (attack_iter == num_iter - 1):
             print('in')
             # Calculate test loss
@@ -341,35 +333,36 @@ def iterative_attack(
         """"Our extension to save the time taken """
         iterations = {"iteration": attack_iter}
 
-        if not os.path.isdir("./{}".format("results")):
-            os.mkdir("./{}".format("results"))
+        if not os.path.isdir(os.path.join(".", "{}".format("results"))):
+            os.mkdir(os.path.join(".", "{}".format("results")))
 
         if original_data == "yes" or original_data == "y":
             dataset_choice = "Original data" + " seed {}".format(rand_seed)
         else:
             dataset_choice = "Authors data" + " seed {}".format(rand_seed)
 
-        if not os.path.isdir("./{}/{}".format("results", dataset_choice)):
-            os.mkdir("./{}/{}".format("results", dataset_choice))
+        if not os.path.isdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice))):
+            os.mkdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice)))
 
         # make path name to folder (results/ original or authors data/ dataset name)
         dataset_namee = [i for i in model_name.split("_") if i in ["german", "drug", "compas"]][0] 
 
         # make folder if it does not exist
-        if not os.path.isdir("./{}/{}/{}".format("results", dataset_choice, dataset_namee)):
-            os.mkdir("./{}/{}/{}".format("results", dataset_choice, dataset_namee))
+        if not os.path.isdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice), "{}".format(dataset_namee))):
+            os.mkdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice), "{}".format(dataset_namee)))
 
         # just a placeholder
         time_and_it = "time_and_it"
 
+        last_path = os.path.join(".", "{}".format("results"), "{}".format(dataset_choice), "{}".format(dataset_namee), "{}".format(time_and_it))
         # make folder if it does not exist
-        if not os.path.isdir("./{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, time_and_it)):
-            os.mkdir("./{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, time_and_it))
+        if not os.path.isdir(last_path):
+            os.mkdir(last_path)
 
         # save number of iterations for each epsilon in the concerning folder
         csv_column = ['time_taken_seconds', 'iteration']
         csv_file_name = '{}-{}.csv'.format(attack_method, model_name)
-        path_to_csv = "./{}/{}/{}/{}/{}".format("results", dataset_choice, dataset_namee, time_and_it, csv_file_name)
+        path_to_csv = os.path.join(last_path, csv_file_name)
         if not os.path.isfile(path_to_csv):
             try:
                 with open(path_to_csv, 'a') as csvfile:
@@ -454,9 +447,9 @@ def init_gradient_attack_from_mask(
     
     ######### ADDED BY STUDENTS #########
     if original_data == "yes" or original_data == "y":
-        DATA_FOLDER = "./original_data" 
+        DATA_FOLDER = os.path.join(".", "original_data")
     else:
-        DATA_FOLDER = "./authors_data"
+        DATA_FOLDER = os.path.join(".", "authors_data")
     #####################################
 
     dataset_path = os.path.join(DATA_FOLDER)
@@ -467,11 +460,6 @@ def init_gradient_attack_from_mask(
 
     male_train_index=np.where(group_label[0:general_train_idx] == 0)[0].astype(np.int32)
     female_train_index=np.where(group_label[0:general_train_idx] == 1)[0].astype(np.int32)
-    ############################################ CHANGED THIS ############################################
-    # male_test_index= np.where(group_label[general_train_idx:] == 0)[0].astype(np.int32)
-    # female_test_index= np.where(group_label[general_train_idx:] == 1)[0].astype(np.int32)
-    ############################################ CHANGED THIS ############################################
-
 
     index_male_true_train = np.where(np.logical_and(group_label[0:general_train_idx] == 0, Y_train==1))[0].astype(np.int32)
     index_female_true_train = np.where(np.logical_and(group_label[0:general_train_idx] == 1, Y_train==1))[0].astype(np.int32)
