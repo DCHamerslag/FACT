@@ -97,4 +97,4 @@ python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset g
 ```
 
 To plot the results after running all the attacks on all datasets with epsilons from 0.0 up to 1, a notebook called plot_results_best_metric is added. For seed 0 this will produce and automatically plot the following image (with the default seed) together with a dataframe which shows the time taken in seconds and the number of iterations for each attack. 
-![](seed_0_results.png)
+![](./seed_0_results.png)
