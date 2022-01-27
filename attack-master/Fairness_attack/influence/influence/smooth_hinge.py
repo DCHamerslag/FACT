@@ -49,7 +49,7 @@ class SmoothHinge(GenericNeuralNet):
 
     # Expects labels to be +1 or -1
 
-    ############################################ CHANGED BY STUDENTS ###########################################
+    ############################################ ADDITIONS ###########################################
     def __init__(self, positive_sensitive_el,negative_sensitive_el,sensitive_feature_idx,input_dim, temp, weight_decay, use_bias, rand_seed, **kwargs):
         self.sensitive_feature_idx = sensitive_feature_idx
         self.weight_decay = weight_decay
@@ -58,8 +58,8 @@ class SmoothHinge(GenericNeuralNet):
         self.use_bias = use_bias
         self.positive_sensitive_el =positive_sensitive_el
         self.negative_sensitive_el =negative_sensitive_el
-        self.rand_seed = rand_seed
-    ############################################ CHANGED BY STUDENTS ###########################################
+        self.rand_seed = rand_seed # OUR ADDITION
+    ############################################ ADDITIONS ###########################################
 
         super(SmoothHinge, self).__init__(**kwargs)
 
@@ -69,9 +69,9 @@ class SmoothHinge(GenericNeuralNet):
             loss='hinge',
             tol=1e-6,
             fit_intercept=self.use_bias,
-            ############################################ CHANGED BY STUDENTS ###########################################
+            ############################################ ADDITIONS ###########################################
             random_state=24+rand_seed,
-            ############################################ CHANGED BY STUDENTS ###########################################
+            ############################################ ADDITIONS ###########################################
             max_iter=5000)
 
         C_minus_one = 1.0 / ((self.num_train_examples - 1) * self.weight_decay)
@@ -80,9 +80,9 @@ class SmoothHinge(GenericNeuralNet):
             loss='hinge',
             tol=1e-6,
             fit_intercept=self.use_bias,
-            ############################################ CHANGED BY STUDENTS ###########################################
+            ############################################ ADDITIONS ###########################################
             random_state=24+rand_seed,
-            ############################################ CHANGED BY STUDENTS ###########################################
+            ############################################ ADDITIONS ###########################################
             max_iter=5000)     
 
         self.set_params_op = self.set_params()
