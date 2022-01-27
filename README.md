@@ -36,24 +36,24 @@ institution = "University of California, Irvine, School of Information and Compu
 
 # Tested Environment
 The code was tested in the environment provided by the authors. The following requirements would work:  
-- Python 3.6
-- PIP 20.3.1
-- setuptools 19.2 (in most of the cases you have to downgrade)
-- Tensorflow 1.12.3
-- scikit-learn 0.23.1  
-- tensorboard 1.12.2
-- cvxpy 0.4.11 [cvxpy 1.0+ is not backwards compatible, therefore the downgrade of setuptools]
-- CVXcanon 0.1.1  
-- scs 2.1.2
-- scipy 1.1.0  
-- numpy 1.16.2
-- pandas 1.1.4  
-- Matplotlib 3.3.3  
-- tabulate 0.8.9
-- seaborn 0.11.0  
-- tqdm 4.62.3
-- IPython 7.16.1
-- pillow 8.0.1
+Python 3.6
+PIP 20.3.1
+setuptools 19.2 (in most of the cases you have to downgrade)
+Tensorflow 1.12.3
+scikit-learn 0.23.1  
+tensorboard 1.12.2
+cvxpy 0.4.11 [cvxpy 1.0+ is not backwards compatible, therefore the downgrade of setuptools]
+CVXcanon 0.1.1  
+scs 2.1.2
+scipy 1.1.0  
+numpy 1.16.2
+pandas 1.1.4  
+Matplotlib 3.3.3  
+tabulate 0.8.9
+seaborn 0.11.0  
+tqdm 4.62.3
+IPython 7.16.1
+pillow 8.0.1
 
 
 # Running Instructions
@@ -73,36 +73,28 @@ python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset g
 ```
 
 # Our additions:
-We have added three parameters:
-- --original_data: which is by default no. This means that the model will run on the authors data. If yes or y is filled in, the model will first make a dataset similar to that of the authors (same preprocessing techniques), where only the shuffling will be different. Thereafter the created datasets will be used to run. 
-- --rand_seed: which is by default 0. This one should be a natural value (ℕ), i.e. a non-negative integer. However, a value ∈ {0,1,2,3} is recommended, since this value is added to the seeds already implemented by the authors.
-- --plot_results: which is by default no. **This one only works if and only if the chosen dataset has been run for all three attacks with the ten epsilons from 0.1 to 1.** Thus this one can only be --plot_results y if all attacks have already been run with the ten epsilons (3 * 10) or if one runs multiple commands with a ; in between. Then the last command can include --plot_results y (explained at the bottom).
+We have added two parameters:
+- --original_data: which is by default no. This means that the model will run on the authors data. If yes or y is filled in, the model will make a similar datasets to that of the authors (same preprocessing techniques) and run these. Only the shuffling will be different. Please be aware that this should only be done once. Otherwise the results will not be comparable. 
+- --rand_seed: which is by default 0. This one should be a natural value $(\mathbb{N})$, i.e. a non-negative integer. However, a value $\in$ {0,1,2,3} is recommended, since this value is added to the seeds already implemented by the authors.
 
 We have added four folders in the main folder Fairness_attack:
 - authors_data: which is the data provided by the authors.
-- original_data: which consists of a resources folder that contains the original raw data. To try and reproduce the results of the authors, a file named make_datasets.py is automatically called if --original_data y is included in the run. The process of reproducing the datasets, is covered in the next folder.
+- original_data: which consists of a resources folder that contains the original raw data. To try and reproduce the results of the authors, a file named make_datasets.py is automatically called if the original datasets are not yet created and --original_data y is included in the run (otherwise it will skip creating new datasets). The process of reproducing the datasets, is covered in the next folder.
 - reverse_engineering: which also consists of the data provided by the authors as well as the original raw data. The Datasets - reverse_engineering notebook is there to show our reverse_engineering process and how we managed to create the same datasets by performing different operations and transformations.
-- results: which consists of a plot_results.py file and a notebook with the same code. The first can only be called in the command if and only if all the attacks have been run with 10 epsilons varying from 0.1 up to 1 (explained later on in this file as well as in our paper). The notebook is there if one does not want to plot the results immediately after running.
+- results: which consists of a plot_results_all_metrics.ipynb and plot_results_best_metrics.ipynb file. The first is only there to show that different metrics (mean, max and last) have been evaluated to check which one is the most comparable to the results of the authors. The second notebook is there to plot the results with the best metrics (in our case last).
 
-
-Furthermore, for convenience, we set the **position of the sensitive feature at the start of each original dataset, thus sensitive_feature_idx is always 0**, if --original_data y.
+Furthermore, for convenience, we set the **position of the sensitive feature at the start of each original dataset, thus sensitive_feature_idx should always be 0**, if --original_data y.
 
 To run IAF for the original german dataset (--original_data y and --sensitive_feature_idx 0):
 ```bash
-python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset german --use_slab --sensitive_feature_idx 0 --sensitive_attr_filename german_group_label.npz --method IAF --epsilon 0.1 --original_data y
+python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset german --use_slab --sensitive_feature_idx 0 --sensitive_attr_filename german_group_label.npz --method IAF --epsilon 0.1 --original_y
 ```
 
 
 To run the same example above with a different seed (+1 on the seeds implemented by the authors):
 ```bash
-python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset german --use_slab --sensitive_feature_idx 0 --sensitive_attr_filename german_group_label.npz --method IAF --epsilon 0.1 --original_data y --rand_seed 1
+python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset german --use_slab --sensitive_feature_idx 0 --sensitive_attr_filename german_group_label.npz --method IAF --epsilon 0.1 --original_y --rand_seed 1
 ```
 
-In case one wants to **run all three attacks with all epsilons between [0,1]**, the same line can be run multiple times in succession with a ; between the lines. On the last line --plot_results y is acceptable in this case (3 * 10) have already been run then. To give an example, let's define x as the previous command with attack method IAF and each time a different epsilon, y as the previous command with attack method RAA and each time a different epsilon and z as again the previous command with attack method NRAA and each time a different epsilon. Then we can run all the commands at once, with the --plot_results y included in the last command.
-```bash
-x; x; x; x; x; x; x; x; x; x; y; y; y; y; y; y; y; y; y; y; z; z; z; z; z; z; z; z; z; z(this one includes --plot_results y);
-```
-
-For the authors german dataset this will produce and automatically plot the following image (with the default seed).
-To generate the dataframe, you can make sure to print the dataframe specified at the bottom of the function plot_seed() in the plot_results.py file:
-![](attack-master/authors_data_seed_0-german.png)
+To plot the results after running all the attacks on all datasets with epsilons from 0.0 up to 1, a notebook called plot_results_best_metric is added. For seed 0 this will produce and automatically plot the following image (with the default seed) together with a dataframe which shows the time taken in seconds and the number of iterations for each attack. 
+![](../../seed_0_results.png)
