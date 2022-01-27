@@ -23,10 +23,10 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
     force_refresh=True,
     test_description=None,
     output_root=None,
-    ########### ADDED BY STUDENTS ##########
+    ########### ADDITIONS ###################
     original_data=None,
     rand_seed=0
-    ########### ADDED BY STUDENTS ##########
+    #########################################
     ):
     """
     Returns poisoned_X_train, a subset of model.data_sets.train (marked by indices_to_poison)
@@ -61,7 +61,7 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
     weights = model.sess.run(model.weights)
 
     if(attack_method == "RAA"):
-        ######### ADDED BY STUDENTS #########
+        ######### ADDITIONS #################
         if original_data == "yes" or original_data == "y":
             DATA_FOLDER = os.path.join(".", "original_data")
         else:
@@ -82,9 +82,9 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
             elif(k in female_train_index):
                 gender_labels[k] = -1
         
-        ############################################ CHANGED THIS ############################################
-        random.seed(0+rand_seed) 
-        ############################################ CHANGED THIS ############################################
+        ############################################ ADDITIONS #######################################################
+        random.seed(0+rand_seed)  # added + rand_seed (since if rand_seed = 0, it is the same as the original paper)
+        ##############################################################################################################
 
         if(advantaged == -1):
             op_indx  = np.where((data_sets.train.labels == -1)& (gender_labels==-1))[0]
@@ -105,12 +105,12 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
  
 
     elif(attack_method == "NRAA"):
-        ######### ADDED BY STUDENTS #########
+        ######### ADDITIONS ####################################
         if original_data == "yes" or original_data == "y":
             DATA_FOLDER = os.path.join(".", "original_data")
         else:
             DATA_FOLDER = os.path.join(".", "authors_data")
-        #####################################
+        ########################################################
 
         dataset_path = os.path.join(DATA_FOLDER)
         f = np.load(os.path.join(dataset_path, sensitive_file))
@@ -126,9 +126,9 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
             elif(k in female_train_index):
                 gender_labels[k] = -1
 
-        ############################################ CHANGED THIS ############################################
-        random.seed(0+rand_seed) 
-        ############################################ CHANGED THIS ############################################
+        ############################################ ADDITIONS #####################################################
+        random.seed(0+rand_seed) # added + rand_seed (since if rand_seed = 0, it is the same as the original paper)
+        ############################################################################################################
         
         if(advantaged == -1):
             op_indx  = np.where((data_sets.train.labels == -1)& (gender_labels==-1))[0]
@@ -195,11 +195,11 @@ def iterative_attack(
     num_copies=None,
     stop_after=3,
     start_time=None,
-    ########### ADDED BY STUDENTS ##########
+    ########### ADDITIONS ##########
     original_data=None,
     rand_seed=0,
     model_name=None
-    ########### ADDED BY STUDENTS ##########
+    ################################
     ):
 
     if num_copies is not None:
@@ -247,10 +247,10 @@ def iterative_attack(
             force_refresh=True,
             test_description=test_description,
             output_root=output_root,
-            ############################################ CHANGED THIS ############################################
+            ############################################ ADDITIONS ############################################
             original_data=original_data,
             rand_seed=rand_seed
-            ############################################ CHANGED THIS ############################################
+            ###################################################################################################
             )
 
         if num_copies is not None:
@@ -329,7 +329,7 @@ def iterative_attack(
                     nums_copies=nums_copies)
             if stop_counter >= stop_after:
                 break
-        ########################################## ADDED BY STUDENTS #############################################################
+        ########################################## ADDITIONS #############################################################
         """"Our extension to save the time taken """
         iterations = {"iteration": attack_iter}
 
@@ -377,7 +377,7 @@ def iterative_attack(
                 writer = csv.DictWriter(csvfile, fieldnames=csv_column)
                 writer.writerow(iterations)
 
-        ########################################## ADDED BY STUDENTS #############################################################
+        ########################################################################################################################
 
 
     if start_time is not None:
@@ -438,14 +438,14 @@ def init_gradient_attack_from_mask(
     sensitive_file,
     attack_method,
     use_copy=True,
-    ########### ADDED BY STUDENTS ##########
+    ########### ADDITIONS #############
     original_data=None,
     rand_seed=0
-    ########### ADDED BY STUDENTS ##########
+    ###################################
     ):
 
     
-    ######### ADDED BY STUDENTS #########
+    ######### ADDITIONS #################
     if original_data == "yes" or original_data == "y":
         DATA_FOLDER = os.path.join(".", "original_data")
     else:
@@ -493,9 +493,9 @@ def init_gradient_attack_from_mask(
         num_pos_copies = int(np.round(np.mean(Y_train == -1) * num_copies))
         num_neg_copies = num_copies - num_pos_copies
 
-        ############################################ CHANGED THIS ############################################
-        np.random.seed(0+rand_seed)
-        ############################################ CHANGED THIS ############################################
+        ############################################ ADDITIONS #########################################################
+        np.random.seed(0+rand_seed) # added + rand_seed (since if rand_seed = 0, it is the same as the original paper)
+        ################################################################################################################
 
         if(train_data_one_female_prob>train_data_one_male_prob):
             advantaged = -1
