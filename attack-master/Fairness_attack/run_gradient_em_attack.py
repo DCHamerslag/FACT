@@ -4,10 +4,9 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import os
-############################################ CHANGED THIS ############################################
+############################################ ADDITIONS ############################################
 import csv
-import glob
-############################################ CHANGED THIS ############################################
+###################################################################################################
 import argparse
 import time
 
@@ -16,7 +15,6 @@ import numpy as np
 import scipy.sparse as sparse
 import data_utils as data
 import datasets
-from results.plot_results import plot_seed
 
 import iterative_attack
 from influence.influence.smooth_hinge import SmoothHinge
@@ -25,9 +23,9 @@ from tensorflow.contrib.learn.python.learn.datasets import base
 
 import tensorflow as tf
 
-############################################ ADDED THIS ############################################
+############################################ ADDITIONS #################################################
 time_start = time.time()
-############################################ ADDED THIS ############################################
+########################################################################################################
 
 def get_projection_fn_for_dataset(dataset_name, X, Y, use_slab, use_LP, percentile):
     if dataset_name in ['enron', 'imdb','german','compas','drug']:
@@ -69,10 +67,9 @@ parser.add_argument('--sensitive_feature_idx', default=36)
 parser.add_argument('--method', default="IAF")
 parser.add_argument('--sensitive_attr_filename',default='german_group_label.npz')
 
-############################################ ADDED THIS ###################################################
+############################################ ADDITIONS #####################################################
 parser.add_argument('--original_data', default="no") # check if model runs with authors or original data
 parser.add_argument('--rand_seed', default=0) # add given value to seeds in code (suggested 1, 2 or 3)
-parser.add_argument('--plot_results', default='no') # plot results after finish
 ###########################################################################################################
 args = parser.parse_args()
 
@@ -92,13 +89,11 @@ attack_method = args.method
 sensitive_idx = int(args.sensitive_feature_idx)
 sensitive_file = args.sensitive_attr_filename
 
-############################################ ADDED THIS ############################################
+############################################ ADDITIONS #############################################
 original_data = args.original_data
 original_data = original_data.lower()
 rand_seed = int(args.rand_seed)
 np.random.seed(1+rand_seed)
-plot_results = args.plot_results
-plot_results = plot_results.lower()
 ####################################################################################################
 
 if(attack_method == "IAF"):
@@ -174,7 +169,7 @@ else:
     assert total_grad_iter % max_em_iter == 0
     num_grad_iter_per_em = int(np.round(total_grad_iter / max_em_iter))
 
-############################################ CHANGED THIS ############################################
+############################################ ADDITIONS ###############################################
 X_train, Y_train, X_test, Y_test = datasets.load_dataset(dataset_name, original_data, rand_seed)
 ######################################################################################################
 
@@ -220,7 +215,7 @@ model2 = SmoothHinge(
     method = attack_method,
     general_train_idx=general_train_idx,
     sensitive_file=sensitive_file,
-    ####### ADDED by students ########
+    ####### ADDITIONS #################
     original_data=original_data,
     rand_seed=rand_seed
     ##################################
@@ -250,7 +245,7 @@ X_modified, Y_modified, indices_to_poison, copy_array, advantaged = iterative_at
     sensitive_file,
     attack_method,
     use_copy=use_copy,
-    ####### ADDED by students ########
+    ####### ADDITIONS ################
     original_data=original_data,
     rand_seed=rand_seed
     ##################################
@@ -284,7 +279,7 @@ model = SmoothHinge(
     method = attack_method,
     general_train_idx=general_train_idx,
     sensitive_file=sensitive_file,
-    ####### ADDED by students ########
+    ####### ADDITIONS ################
     original_data=original_data,
     rand_seed=rand_seed
     ##################################
@@ -341,14 +336,14 @@ for em_iter in range(num_em_iters):
         num_copies=copy_array,
         stop_after=2,
         start_time=start_time,
-        ####### ADDED by students ########
+        ####### ADDITIONS ################
         original_data=original_data,
         rand_seed=rand_seed,
         model_name=model_name
         ##################################
         )
 
-########################################## ADDED BY STUDENTS #############################################################
+########################################## ADDITIONS #####################################################################
 time_end = time.time()
 total_time = {"time_taken_seconds": time_end - time_start}
 
@@ -399,25 +394,5 @@ else:
     with open(path_to_csv, 'a') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=csv_column)
         writer.writerow(total_time)
-
-# parameters for plotting results immediately after finish
-methods_list = [os.path.join(" ", "IAF-").strip(),
-                os.path.join(" ", "RAA-").strip(),
-                os.path.join(" ", "NRAA-").strip()]
-folder_measures = ["test_accs", "parities and biases"]
-measures = ["test_acc", "parity", "EO bias"]
-time_and_it = "time_and_it"
-time_and_it_columns = ["time_taken_seconds", "iteration"]
-
-counter_glob = 0
-for i in glob.glob(os.path.join(".", "results", "{}".format(dataset_choice), "{}".format(dataset_namee), "*")):
-    counter_glob += len(glob.glob(os.path.join("{}".format(i), "*")))
-
-# if --plot_results yes, then plot results immediately after finish
-if plot_results == "y" or plot_results == "yes":
-    # but only if all 3 attacks have been run with 10 epsilons (from 0.1 to 1). This makes 90 files in total.
-    if counter_glob == 90:
-        plot_seed(dataset_namee, dataset_choice, methods_list, folder_measures, measures, time_and_it, time_and_it_columns)
-########################################## ADDED BY STUDENTS ################################################################
 
 print("The end")
