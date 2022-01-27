@@ -39,7 +39,7 @@ def check_poisoned_data(X_train, Y_train, X_poison, Y_poison, X_modified, Y_modi
 
 """ Added the conidition for the data folder and also added a parameter to the function """
 def load_german(original_data):
-    ######### ADDED BY STUDENTS #########
+    ######### ADDITIONS #################
     if original_data == "yes" or original_data == "y":
         DATA_FOLDER = "./original_data" 
     else:
@@ -63,7 +63,7 @@ def load_german(original_data):
 
 """ Added the conidition for the data folder and also added a parameter to the function """
 def load_compas(original_data):
-    ######### ADDED BY STUDENTS #########
+    ######### ADDITIONS #################
     if original_data == "yes" or original_data == "y":
         DATA_FOLDER = "./original_data" 
     else:
@@ -110,21 +110,18 @@ def load_drug(original_data):
     return X_train, Y_train, X_test, Y_test
 
 def load_dataset(dataset_name, original_data, rand_seed):
-    already_in_original =   [os.path.join(" ", "make_datasets.py").strip(),
-                             os.path.join(" ", "resources").strip(),
-                             os.path.join(" ", "__init__.py").strip()]
+    dataset_names = ["data.npz", "german_group_label.npz", "compas_data.npz", "compas_group_label.npz", 
+                     "drug2_data.npz", "drug2_group_label.npz"]
 
-    ################## ADDED BY STUDENTS ##########################
+    ################## ADDITIONS ##################################
     # Make sure to only make the dataset once (since they are making it only once as well)
     if original_data == "yes" or original_data == "y":
-        files_in_original = [i.split("original_data")[1] for i in glob.glob(os.path.join(".", "original_data", "*"))]
-        if already_in_original == files_in_original:
+        if len([i for i in glob.glob(os.path.join("original_data", "*")) if i.split(os.path.join("original_data", " ").strip())[1] in dataset_names]) != len(dataset_names):
             make_datasets.create_orig_german_dataset()
             make_datasets.create_orig_compas_dataset()
             make_datasets.create_orig_drug_dataset()
     ###############################################################
 
-    ################## CHANGED BY STUDENTS ##################
     if dataset_name == 'german':
         return load_german(original_data)
     elif dataset_name == 'compas':
