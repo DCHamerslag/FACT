@@ -72,10 +72,10 @@ class GenericNeuralNet(object):
     """
 
     def __init__(self, **kwargs):
-        ###################### CHANGED BY STUDENTS #######################
+        ###################### ADDITIONS #######################
         np.random.seed(0+self.rand_seed)
         tf.set_random_seed(0+self.rand_seed)
-        ###################### CHANGED BY STUDENTS #######################
+        ###################### ADDITIONS #######################
         
         self.batch_size = kwargs.pop('batch_size')
         self.data_sets = kwargs.pop('data_sets')
@@ -174,7 +174,7 @@ class GenericNeuralNet(object):
             self.grad_adversarial_loss_op = tf.gradients(self.adversarial_loss, self.params)
 
     def get_fairness_measures(self,art_poisoned_predicts_test,art_poisoned_predicts_train):
-        ########## ADDED by students ##########
+        ####################### ADDITIONS ############################
         if self.original_data == "yes" or self.original_data == "y":
             DATA_FOLDER = os.path.join(".", "original_data")
         else:
@@ -211,7 +211,7 @@ class GenericNeuralNet(object):
         b_male_test = (test_male_zero_prediction.shape[0]/poi_test_hat_zero.shape[0])*poi_test_y_one_hat_zero
         print("******************Poison model EO bias on Test" + str ( abs( (a_female_test/(a_female_test+b_female_test)) - (a_male_test/(a_male_test+b_male_test)) )) )
 
-        ############################################ ADDED BY STUDENTS ###########################################
+        ############################################ ADDITIONS ###########################################
         """"Our extension to save the results """
 
         # save each iteration in dict__
@@ -262,7 +262,7 @@ class GenericNeuralNet(object):
             with open(path_to_csv, 'a') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
                 writer.writerow(dict__)
-        ############################################ ADDED BY STUDENTS ###########################################
+        ############################################ ADDITIONS ###########################################
 
     def get_vec_to_list_fn(self):
         params_val = self.sess.run(self.params)
@@ -434,7 +434,7 @@ class GenericNeuralNet(object):
             'params_norm': params_norm
         }
 
-        ############################################ ADDED BY STUDENTS ###########################################
+        ############################################ ADDITIONS #######################################################
         """"Our extension to save the results """
         # save each iteration in dict res
         res = {"test_acc": test_acc_val}
