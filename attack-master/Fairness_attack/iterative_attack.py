@@ -32,17 +32,20 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
     Returns poisoned_X_train, a subset of model.data_sets.train (marked by indices_to_poison)
     that has been modified by a single gradient step.
     """
-
     data_sets = model.data_sets
 
+    # define test description
     if test_description is None:
         test_description = test_idx
     
+    # save 
     grad_filename = os.path.join(output_root, 'grad_influence_wrt_input_val_%s_testidx_%s.npy' % (model.model_name, test_description))
 
+    # if no refresh and the file already exists, load the existing file
     if (force_refresh == False) and (os.path.exists(grad_filename)):
         grad_influence_wrt_input_val = np.load(grad_filename)
     else:
+        # otherwise get gradient of the influence with respect to the input
         grad_influence_wrt_input_val = model.get_grad_of_influence_wrt_input(
             indices_to_poison,
             test_idx,
@@ -51,13 +54,16 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
             test_description=test_description,
             loss_type=loss_type)
 
+    # poison X_train
     poisoned_X_train = data_sets.train.x[indices_to_poison, :]
 
+    # poison X_train
     poisoned_X_train -= step_size * grad_influence_wrt_input_val
 
+    # poison labels
     poisoned_labels = data_sets.train.labels[indices_to_poison]
 
-
+    # get weights
     weights = model.sess.run(model.weights)
 
     if(attack_method == "RAA"):
@@ -72,9 +78,11 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
         f = np.load(os.path.join(dataset_path, sensitive_file))
         group_label = f['group_label']
 
+        # get indices for male and female
         male_train_index=np.where(group_label[0:general_train_idx] == 0)[0].astype(np.int32)
         female_train_index=np.where(group_label[0:general_train_idx] == 1)[0].astype(np.int32)
 
+        # make gender labels with 1 for male and -1 for female
         gender_labels = np.zeros(data_sets.train.labels.shape[0])
         for k in range(general_train_idx):
             if(k in male_train_index):
@@ -86,20 +94,23 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
         random.seed(0+rand_seed)  # added + rand_seed (since if rand_seed = 0, it is the same as the original paper)
         ##############################################################################################################
 
+        # get op idx based on advantaged group
         if(advantaged == -1):
             op_indx  = np.where((data_sets.train.labels == -1)& (gender_labels==-1))[0]
         else:
             op_indx  = np.where((data_sets.train.labels == -1)& (gender_labels==1))[0]
 
+        # poison a randomly chosen index
         rand1 = random.randint(0,op_indx.shape[0]-1)
         poisoned_X_train[0] = data_sets.train.x[op_indx[rand1], :]
  
-
+        # get op idx based on advantaged group
         if(advantaged == -1):
             op_indx  = np.where((data_sets.train.labels == 1)& (gender_labels==1))[0]
         else:
             op_indx  = np.where((data_sets.train.labels == 1)& (gender_labels==-1))[0]
 
+        # poison a randomly chosen index
         rand2 = random.randint(0,op_indx.shape[0]-1)
         poisoned_X_train[1] = data_sets.train.x[op_indx[rand2], :]
  
@@ -116,9 +127,11 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
         f = np.load(os.path.join(dataset_path, sensitive_file))
         group_label = f['group_label']
 
+        # get indices for male and female
         male_train_index=np.where(group_label[0:general_train_idx] == 0)[0].astype(np.int32)
         female_train_index=np.where(group_label[0:general_train_idx] == 1)[0].astype(np.int32)
 
+        # make gender labels with 1 for male and -1 for female
         gender_labels = np.zeros(data_sets.train.labels.shape[0])
         for k in range(general_train_idx):
             if(k in male_train_index):
@@ -130,11 +143,13 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
         random.seed(0+rand_seed) # added + rand_seed (since if rand_seed = 0, it is the same as the original paper)
         ############################################################################################################
         
+        # get op idx based on advantaged group
         if(advantaged == -1):
             op_indx  = np.where((data_sets.train.labels == -1)& (gender_labels==-1))[0]
         else:
             op_indx  = np.where((data_sets.train.labels == -1)& (gender_labels==1))[0]
 
+        
         maxdist = 0
         maxpoint = 0
         for points in range(op_indx.shape[0]):
@@ -153,7 +168,6 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
         else:
             op_indx  = np.where((data_sets.train.labels == 1)& (gender_labels==-1))[0]
 
-            
         maxdist = 0
         maxpoint = 0
         for points in range(op_indx.shape[0]):
@@ -175,6 +189,8 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
         theta=weights[:-1],
         bias=weights[-1])
  
+    # returns poisoned_X_train, a subset of model.data_sets.train (marked by indices_to_poison)
+    # that has been modified by a single gradient step.
     return poisoned_X_train
 
 
@@ -202,6 +218,7 @@ def iterative_attack(
     ################################
     ):
 
+    # checks for number copies
     if num_copies is not None:
         assert len(num_copies) == 2
         assert np.min(num_copies) >= 1
@@ -219,6 +236,7 @@ def iterative_attack(
 
     print('Test idx: %s' % test_idx)
 
+    # make zero matrices
     if start_time is not None:
         assert num_copies is not None
         times_taken = np.zeros(num_iter)
@@ -233,6 +251,7 @@ def iterative_attack(
         # Create modified training dataset
         old_poisoned_X_train = np.copy(model.data_sets.train.x[indices_to_poison, :])
 
+        # poisoned_X_train modified by a single gradient step
         poisoned_X_train_subset = poison_with_influence_proj_gradient_step(
             model,
             general_train_idx,
@@ -263,7 +282,7 @@ def iterative_attack(
             poisoned_X_train = np.copy(model.data_sets.train.x)
             poisoned_X_train[indices_to_poison, :] = poisoned_X_train_subset
 
-        # Measure some metrics on what the gradient step did
+        # measure some metrics on what the gradient step did
         labels = model.data_sets.train.labels
         dists_sum = 0.0
         poisoned_dists_sum = 0.0
@@ -379,7 +398,7 @@ def iterative_attack(
 
         ########################################################################################################################
 
-
+    # save time measures
     if start_time is not None:
         np.savez(os.path.join(output_root, '%s_timing' % (model.model_name)),
             times_taken=times_taken,
@@ -396,6 +415,7 @@ def get_feasible_flipped_mask(
     class_map,
     use_slab=False):
 
+    # computes ||Q(x - mu)|| in the corresponding norm.
     sphere_dists_flip = defenses.compute_dists_under_Q(
         X_train, -Y_train,
         Q=None,
@@ -405,6 +425,7 @@ def get_feasible_flipped_mask(
         norm=2)
 
     if use_slab:
+        # computes ||Q(x - mu)|| in the corresponding norm if slab is used
         slab_dists_flip = defenses.compute_dists_under_Q(
             X_train, -Y_train,
             Q=centroid_vec,
@@ -413,15 +434,19 @@ def get_feasible_flipped_mask(
             class_map=class_map,
             norm=2)
 
+    # create boolean vector of X_train's length
     feasible_flipped_mask = np.zeros(X_train.shape[0], dtype=bool)
 
     for y in set(Y_train):
+        # for each class get flipped sphere radius 
         class_idx_flip = class_map[-y]
         sphere_radius_flip = sphere_radii[class_idx_flip]
-
+        
+        # fill with true of false (0 or 1) based on condition
         feasible_flipped_mask[Y_train == y] = (sphere_dists_flip[Y_train == y] <= sphere_radius_flip)
 
         if use_slab:
+            # if slab is used, more conditions are checked to fill with true or false (0 or 1)
             slab_radius_flip = slab_radii[class_idx_flip]
             feasible_flipped_mask[Y_train == y] = (
                 feasible_flipped_mask[Y_train == y] &
@@ -452,21 +477,27 @@ def init_gradient_attack_from_mask(
         DATA_FOLDER = os.path.join(".", "authors_data")
     #####################################
 
+    # get the group labels i.e. advantaged/disadvantaged 
     dataset_path = os.path.join(DATA_FOLDER)
     f = np.load(os.path.join(dataset_path, sensitive_file))
     group_label = f['group_label']
 
+    # defined advantaged as 1
     advantaged =1
 
+    # get all indices for male and female
     male_train_index=np.where(group_label[0:general_train_idx] == 0)[0].astype(np.int32)
     female_train_index=np.where(group_label[0:general_train_idx] == 1)[0].astype(np.int32)
 
+    # use logical and to check above condition together with value in Y train to get indices
     index_male_true_train = np.where(np.logical_and(group_label[0:general_train_idx] == 0, Y_train==1))[0].astype(np.int32)
     index_female_true_train = np.where(np.logical_and(group_label[0:general_train_idx] == 1, Y_train==1))[0].astype(np.int32)
 
+    # compute probabilites
     train_data_one_female_prob = group_label[0:general_train_idx][index_female_true_train].shape[0]/female_train_index.shape[0]
     train_data_one_male_prob = group_label[0:general_train_idx][index_male_true_train].shape[0]/male_train_index.shape[0]
    
+   # make gender labels with 1 and -1
     gender_labels = np.zeros(general_train_idx)
     for k in range(general_train_idx):
         if(k in male_train_index):
@@ -475,16 +506,21 @@ def init_gradient_attack_from_mask(
             gender_labels[k] = -1
 
     if not use_copy:
+        # calculate number of compies based on epsilon times samples in X_train
         num_copies = int(np.round(epsilon * X_train.shape[0]))
 
+        # randomly choose an idx to copy
         idx_to_copy = np.random.choice(
             np.where(feasible_flipped_mask)[0],
             size=num_copies,
             replace=True)
 
+        # concatenate the array which needs to be copied to X train
         X_modified = data.vstack(X_train, X_train[idx_to_copy, :])
+        # append flipped value that needs to be copied Y train
         Y_modified = np.append(Y_train, -Y_train[idx_to_copy])
         copy_array = None
+        # get all indices of the appended/concatenated values to poison 
         indices_to_poison = np.arange(X_train.shape[0], X_modified.shape[0])
 
     else:
@@ -497,19 +533,23 @@ def init_gradient_attack_from_mask(
         np.random.seed(0+rand_seed) # added + rand_seed (since if rand_seed = 0, it is the same as the original paper)
         ################################################################################################################
 
+        # if female prob > male prob, advantaged is -1, since females are -1 (gender labels)
         if(train_data_one_female_prob>train_data_one_male_prob):
             advantaged = -1
+            # get positive and negative indices
             pos_idx_to_copy = np.random.choice(
                 np.where(feasible_flipped_mask & (Y_train == 1)& (gender_labels==-1))[0])
             neg_idx_to_copy = np.random.choice(
                 np.where(feasible_flipped_mask & (Y_train == -1)& (gender_labels==1))[0])
         else:
+            # if male prob > female prob, advantaged is 1, since males are 1 (gender labels)
             advantaged = 1
             pos_idx_to_copy = np.random.choice(
                 np.where(feasible_flipped_mask & (Y_train == 1)& (gender_labels==1))[0])
             neg_idx_to_copy = np.random.choice(
                 np.where(feasible_flipped_mask & (Y_train == -1)& (gender_labels==-1))[0])
 
+        # checks to print the correct values for female and male
         if(neg_idx_to_copy in female_train_index):
             print("female")
         else:
@@ -521,9 +561,11 @@ def init_gradient_attack_from_mask(
         print(neg_idx_to_copy)
         print(pos_idx_to_copy)
         #exit()
+        # subtract 1 from both pos and neg number of copies
         num_pos_copies -= 1
         num_neg_copies -= 1
 
+        # add all the points to x and y (see explanation in add points function)
         X_modified, Y_modified = data.add_points(
             X_train[pos_idx_to_copy, :],
             1,

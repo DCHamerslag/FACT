@@ -57,6 +57,7 @@ def compute_dists_under_Q(
     If centroids is not specified, calculate it from the data.
     If Q has dimension 3, then each class gets its own Q.
     """
+    # checks if everything went fine with the class maps and centroids
     if (centroids is not None) or (class_map is not None):
         assert (centroids is not None) and (class_map is not None)
     if subtract_from_l2:
@@ -65,6 +66,7 @@ def compute_dists_under_Q(
         assert class_map is not None
         assert Q.shape[0] == len(class_map)
 
+    # check which metric has to be used, by default euclidean
     if norm == 1:
         metric = 'manhattan'
     elif norm == 2:
@@ -72,11 +74,13 @@ def compute_dists_under_Q(
     else:
         raise ValueError('norm must be 1 or 2')
 
+    # if this is true, computes ||x - mu|| - ||Q(x - mu)||
     Q_dists = np.zeros(X.shape[0])
     if subtract_from_l2:
         L2_dists = np.zeros(X.shape[0])
-
+    
     for y in set(Y):
+        # if centroids is not specified, calculate it from the data.
         if centroids is not None:
             mu = centroids[class_map[y], :]
         else:
@@ -90,22 +94,26 @@ def compute_dists_under_Q(
                 metric=metric).reshape(-1)
 
         else:
+            # if Q has dimension 3, then each class gets its own Q.
             if len(Q.shape) == 3:
                 current_Q = Q[class_map[y], ...]
             else:
                 current_Q = Q
 
+            # handle sparse matrices
             if sparse.issparse(X):
                 XQ = X[Y == y, :].dot(current_Q.T)
             else:
                 XQ = current_Q.dot(X[Y == y, :].T).T
             muQ = current_Q.dot(mu.T).T
 
+            # calculate pairwise distances (sklearn)
             Q_dists[Y == y] = metrics.pairwise.pairwise_distances(
                 XQ,
                 muQ,
                 metric=metric).reshape(-1)
 
+            # if this is true, computes ||x - mu|| - ||Q(x - mu)||
             if subtract_from_l2:
                 L2_dists[Y == y] = metrics.pairwise.pairwise_distances(
                     X[Y == y, :],
@@ -113,6 +121,7 @@ def compute_dists_under_Q(
                     metric=metric).reshape(-1)
                 Q_dists[Y == y] = np.sqrt(np.square(L2_dists[Y == y]) - np.square(Q_dists[Y == y]))
 
+    # returns a vector of length num_examples (X.shape[0]).
     return Q_dists
 
 

@@ -98,6 +98,7 @@ def load_drug(original_data):
     print(os.path.join(dataset_path, "drug2_data.npz"))
     f = np.load(os.path.join(dataset_path, "drug2_data.npz"))
 
+    # reshape and change the 0 values to -1 in the Y sets respectively
     X_train = f['X_train']
     Y_train = f['Y_train'].reshape(-1)
     Y_train[Y_train == 0] = -1

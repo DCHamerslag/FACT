@@ -979,7 +979,7 @@ class GenericNeuralNet(object):
 
         return grad_influence_wrt_input_val
 
-
+    # update train x set
     def update_train_x(self, new_train_x):
         assert np.all(new_train_x.shape == self.data_sets.train.x.shape)
         new_train = DataSet(new_train_x, np.copy(self.data_sets.train.labels))
@@ -987,7 +987,7 @@ class GenericNeuralNet(object):
         self.all_train_feed_dict = self.fill_feed_dict_with_all_ex(self.data_sets.train)                
         self.reset_datasets()
 
-
+    # update train sets
     def update_train_x_y(self, new_train_x, new_train_y):
         new_train = DataSet(new_train_x, new_train_y)
         self.data_sets = base.Datasets(train=new_train, validation=self.data_sets.validation, test=self.data_sets.test)
@@ -995,7 +995,7 @@ class GenericNeuralNet(object):
         self.num_train_examples = len(new_train_y)
         self.reset_datasets()        
 
-
+    # update test sets
     def update_test_x_y(self, new_test_x, new_test_y):
         new_test = DataSet(new_test_x, new_test_y)
         self.data_sets = base.Datasets(train=self.data_sets.train, validation=self.data_sets.validation, test=new_test)
