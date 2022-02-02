@@ -11,50 +11,47 @@ import defenses
 import upper_bounds
 
 
-# function to transform class maps
+# Transform class maps
 def get_class_map():
     return {-1: 0, 1: 1}
 
-# function to get centroids 
 def get_centroids(X, Y, class_map):
-    # get number of classes in Y
+    # Get number of classes in Y
     num_classes = len(set(Y))
-    # get number of features (columns) in X
+    # Get number of features (columns) in X
     num_features = X.shape[1]
-    # create a number of classes by number of features matrix
+    # Create a number of classes by number of features matrix
     centroids = np.zeros((num_classes, num_features))
-    # for each class, calculate centroid for each column respectively
+    # For each class, calculate centroid for each column respectively
     for y in set(Y):
         centroids[class_map[y], :] = np.mean(X[Y == y, :], axis=0)
     return centroids
 
 def get_centroid_vec(centroids):
-    # check if there are exactly two classes
+    # Check if there are exactly two classes.
     assert centroids.shape[0] == 2
-    # subtract centroids of second class from centroids of first class 
+    # Subtract centroids of second class from centroids of first class.
     centroid_vec = centroids[0, :] - centroids[1, :]
-    # divide by the norm of the centroid vector (previously calculated)
+    # Divide by the norm of the centroid vector (previously calculated)
     centroid_vec /= np.linalg.norm(centroid_vec)
-    # reshape again
+    # Reshape again
     centroid_vec = np.reshape(centroid_vec, (1, -1))
     return centroid_vec
 
 # Can speed this up if necessary
 def get_data_params(X, Y, percentile):
-    # get number of classes in Y
+    # Get number of classes in Y
     num_classes = len(set(Y))
-    # get number of features in X (columns)
+    # Get number of features in X (columns)
     num_features = X.shape[1]
-    # create a number of classes by number of features, zero matrix
+    # Create a number of classes by number of features, zero matrix
     centroids = np.zeros((num_classes, num_features))
     class_map = get_class_map()
-    # get centroids 
     centroids = get_centroids(X, Y, class_map)
 
-    # Get radii for sphere
     sphere_radii = np.zeros(2)
 
-    # computes ||Q(x - mu)|| in the corresponding norm.
+    # Computes ||Q(x - mu)|| in the corresponding norm
     dists = defenses.compute_dists_under_Q(
         X, Y,
         Q=None,
@@ -62,7 +59,7 @@ def get_data_params(X, Y, percentile):
         class_map=class_map,
         norm=2)
 
-    # set sphere radius per class
+    # Set sphere radius per class
     for y in set(Y):
         sphere_radii[class_map[y]] = np.percentile(dists[Y == y], percentile)
 
@@ -79,7 +76,7 @@ def get_data_params(X, Y, percentile):
     return class_map, centroids, centroid_vec, sphere_radii, slab_radii
 
 
-# concatenate two arrays
+# Concatenate two arrays
 def vstack(A, B):
     if (sparse.issparse(A) or sparse.issparse(B)):
         return sparse.vstack((A, B), format='csr')
@@ -92,19 +89,19 @@ def add_points(x, y, X, Y, num_copies=1):
         return X, Y
     x = np.array(x).reshape(-1)
 
-    # check if sparse
+    # Check if sparse
     if sparse.issparse(X):
         X_modified = sparse.vstack((
             X,
             sparse.csr_matrix(
                 np.tile(x, num_copies).reshape(-1, len(x)))))
     else:
-        # append X times num copies to X 
+        # Append X times num copies to X 
         X_modified = np.append(
             X,
             np.tile(x, num_copies).reshape(-1, len(x)),
             axis=0)
-    # same goes for Y
+    # Same goes for Y
     Y_modified = np.append(Y, np.tile(y, num_copies))
     return X_modified, Y_modified
 
@@ -161,11 +158,10 @@ def get_projection_fn(
     percentile=90):
     print(X_clean)
 
-    # set goal
     goal = 'find_nearest_point'
-    # get class map, centroids, centroid vector and radius of sphere and slab
+    # Get class map, centroids, centroid vector and radius of sphere and slab
     class_map, centroids, centroid_vec, sphere_radii, slab_radii = get_data_params(X_clean, Y_clean, percentile)
-    # checks to use minimizer with different param
+    # Checks whether to use minimizer with different params
     if use_lp_rounding or non_negative or less_than_one or (sphere and slab):
         if use_lp_rounding:
             projector = upper_bounds.Minimizer(
@@ -217,7 +213,7 @@ def get_projection_fn(
                 sphere_radius = sphere_radii[class_idx]
                 slab_radius = slab_radii[class_idx]
 
-                # returns optimal x by minimizing
+                # Returns optimal x by minimizing
                 proj_X[idx, :] = projector.minimize_over_feasible_set(
                     None,
                     x,
@@ -226,21 +222,17 @@ def get_projection_fn(
                     sphere_radius,
                     slab_radius)
 
-            # print number of projected examples
             num_projected = np.sum(np.max(X - proj_X, axis=1) > 1e-6)
             print('Projected %s examples.' % num_projected)
-            # return optimal x (projection)
+            # Return optimal x (projection)
             return proj_X
 
-    # if not all the above checks X is either projection onto sphere or onto slab
+    # If not all the above checks X is either projection onto sphere or onto slab
     else:
         def project_onto_feasible_set(X, Y, theta=None, bias=None):
             if sphere:
-                # projection onto sphere
                 X = project_onto_sphere(X, Y, sphere_radii, centroids, class_map)
-
             elif slab:
-                # projection onto slab
                 X = project_onto_slab(X, Y, centroid_vec, slab_radii, centroids, class_map)
             return X
 
