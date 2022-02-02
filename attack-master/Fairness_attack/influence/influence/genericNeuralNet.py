@@ -79,7 +79,7 @@ class GenericNeuralNet(object):
         self.general_train_idx=kwargs.pop('general_train_idx')
         self.sensitive_file=kwargs.pop('sensitive_file')
         ####### ADDED by students ########
-        self.original_data=kwargs.pop('original_data')
+        self.recreated_data=kwargs.pop('recreated_data')
         ##################################
 
         
@@ -165,8 +165,8 @@ class GenericNeuralNet(object):
 
     def get_fairness_measures(self,art_poisoned_predicts_test,art_poisoned_predicts_train):
         ####################### ADDITIONS ############################
-        if self.original_data == "yes" or self.original_data == "y":
-            DATA_FOLDER = os.path.join(".", "original_data")
+        if self.recreated_data == "yes" or self.recreated_data == "y":
+            DATA_FOLDER = os.path.join(".", "recreated_data")
         else:
             DATA_FOLDER = os.path.join(".", "authors_data")
         ######################################
@@ -212,15 +212,15 @@ class GenericNeuralNet(object):
             os.mkdir(os.path.join(".", "{}".format("results")))
 
         # add seed to file name
-        if self.original_data == "yes" or self.original_data == "y":
-            dataset_choice = "Original data" + " seed {}".format(self.rand_seed)
+        if self.recreated_data == "yes" or self.recreated_data == "y":
+            dataset_choice = "Recreated data" + " seed {}".format(self.rand_seed)
         else:
             dataset_choice = "Authors data" + " seed {}".format(self.rand_seed)
 
         if not os.path.isdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice))):
             os.mkdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice)))
 
-        # make path name to folder (results/ original or authors data/ dataset name)
+        # make path name to folder (results/ recreated or authors data/ dataset name)
         dataset_namee = [i for i in self.model_name.split("_") if i in ["german", "drug", "compas"]][0]
 
         # make folder if it does not exist
@@ -400,15 +400,15 @@ class GenericNeuralNet(object):
             os.mkdir(os.path.join(".", "{}".format("results")))
 
         # add random seed to folder name
-        if self.original_data == "yes" or self.original_data == "y":
-            dataset_choice = "Original data" + " seed {}".format(self.rand_seed)
+        if self.recreated_data == "yes" or self.recreated_data == "y":
+            dataset_choice = "Recreated data" + " seed {}".format(self.rand_seed)
         else:
             dataset_choice = "Authors data" + " seed {}".format(self.rand_seed)
 
         if not os.path.isdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice))):
             os.mkdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice)))
 
-        # make path name to folder (results/ original or authors data/ dataset name)
+        # make path name to folder (results/ recreated or authors data/ dataset name)
         dataset_namee = [i for i in self.model_name.split("_") if i in ["german", "drug", "compas"]][0] 
 
         # make folder if it does not exist

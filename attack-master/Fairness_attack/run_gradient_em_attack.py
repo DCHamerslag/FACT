@@ -72,7 +72,7 @@ parser.add_argument('--method', default="IAF")
 parser.add_argument('--sensitive_attr_filename',default='german_group_label.npz')
 
 ############################################ ADDITIONS #####################################################
-parser.add_argument('--original_data', default="no") # check if model runs with authors or original data
+parser.add_argument('--recreated_data', default="no") # check if model runs with authors or recreated data
 parser.add_argument('--rand_seed', default=0) # add given value to seeds in code (suggested 1, 2 or 3)
 ###########################################################################################################
 args = parser.parse_args()
@@ -95,9 +95,9 @@ sensitive_idx = int(args.sensitive_feature_idx)
 sensitive_file = args.sensitive_attr_filename
 
 ############################################ ADDITIONS #############################################
-# check if original data is passed in and if there is an addition to the seeds
-original_data = args.original_data
-original_data = original_data.lower()
+# check if recreated data is passed in and if there is an addition to the seeds
+recreated_data = args.recreated_data
+recreated_data = recreated_data.lower()
 rand_seed = int(args.rand_seed)
 np.random.seed(1+rand_seed)
 ####################################################################################################
@@ -165,12 +165,12 @@ if timed:
     model_name = model_name + '_timed'
 
 # add seed to folder name
-if original_data == "yes" or original_data == "y":
-    dataset_choice = "Original data" + " seed {}".format(rand_seed)
+if recreated_data == "yes" or recreated_data == "y":
+    dataset_choice = "Recreated data" + " seed {}".format(rand_seed)
 else:
     dataset_choice = "Authors data" + " seed {}".format(rand_seed)
     
-# make path name to folder (results/ original or authors data/ dataset name)
+# make path name to folder (results/ recreated or authors data/ dataset name)
 dataset_namee = [i for i in model_name.split("_") if i in ["german", "drug", "compas"]][0] 
 
 # make folder if it does not exist
@@ -188,7 +188,7 @@ else:
 
 ############################################ ADDITIONS ###############################################
 # get the split of the dataset (which is already done in the npz files)
-X_train, Y_train, X_test, Y_test = datasets.load_dataset(dataset_name, original_data, rand_seed)
+X_train, Y_train, X_test, Y_test = datasets.load_dataset(dataset_name, recreated_data, rand_seed)
 ######################################################################################################
 
 # general train idx is the number of samples in X train
@@ -241,7 +241,7 @@ X_modified, Y_modified, indices_to_poison, copy_array, advantaged = iterative_at
     attack_method,
     use_copy=use_copy,
     ####### ADDITIONS ################
-    original_data=original_data,
+    recreated_data=recreated_data,
     rand_seed=rand_seed
     ##################################
     )
@@ -277,7 +277,7 @@ model = SmoothHinge(
     general_train_idx=general_train_idx,
     sensitive_file=sensitive_file,
     ####### ADDITIONS ################
-    original_data=original_data,
+    recreated_data=recreated_data,
     rand_seed=rand_seed
     ##################################
     )
@@ -339,7 +339,7 @@ for em_iter in range(num_em_iters):
         stop_after=2,
         start_time=start_time,
         ####### ADDITIONS ################
-        original_data=original_data,
+        recreated_data=recreated_data,
         rand_seed=rand_seed,
         model_name=model_name
         ##################################
@@ -354,8 +354,8 @@ if not os.path.isdir(os.path.join(".", "{}".format("results"))):
     os.mkdir(os.path.join(".", "{}".format("results")))
 
 # add seed to folder name
-if original_data == "yes" or original_data == "y":
-    dataset_choice = "Original data" + " seed {}".format(rand_seed)
+if recreated_data == "yes" or recreated_data == "y":
+    dataset_choice = "Recreated data" + " seed {}".format(rand_seed)
 else:
     dataset_choice = "Authors data" + " seed {}".format(rand_seed)
     
@@ -363,7 +363,7 @@ else:
 if not os.path.isdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice))):
     os.mkdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice)))
     
-# make path name to folder (results/ original or authors data/ dataset name)
+# make path name to folder (results/ recreated or authors data/ dataset name)
 dataset_namee = [i for i in model_name.split("_") if i in ["german", "drug", "compas"]][0] 
 
 # make folder if it does not exist

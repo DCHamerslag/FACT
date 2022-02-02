@@ -24,7 +24,7 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
     test_description=None,
     output_root=None,
     ########### ADDITIONS ###################
-    original_data=None,
+    recreated_data=None,
     rand_seed=0
     #########################################
     ):
@@ -68,8 +68,8 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
 
     if(attack_method == "RAA"):
         ######### ADDITIONS #################
-        if original_data == "yes" or original_data == "y":
-            DATA_FOLDER = os.path.join(".", "original_data")
+        if recreated_data == "yes" or recreated_data == "y":
+            DATA_FOLDER = os.path.join(".", "recreated_data")
         else:
             DATA_FOLDER = os.path.join(".", "authors_data")
         #####################################
@@ -117,8 +117,8 @@ def poison_with_influence_proj_gradient_step(model, general_train_idx,
 
     elif(attack_method == "NRAA"):
         ######### ADDITIONS ####################################
-        if original_data == "yes" or original_data == "y":
-            DATA_FOLDER = os.path.join(".", "original_data")
+        if recreated_data == "yes" or recreated_data == "y":
+            DATA_FOLDER = os.path.join(".", "recreated_data")
         else:
             DATA_FOLDER = os.path.join(".", "authors_data")
         ########################################################
@@ -212,7 +212,7 @@ def iterative_attack(
     stop_after=3,
     start_time=None,
     ########### ADDITIONS ##########
-    original_data=None,
+    recreated_data=None,
     rand_seed=0,
     model_name=None
     ################################
@@ -267,7 +267,7 @@ def iterative_attack(
             test_description=test_description,
             output_root=output_root,
             ############################################ ADDITIONS ############################################
-            original_data=original_data,
+            recreated_data=recreated_data,
             rand_seed=rand_seed
             ###################################################################################################
             )
@@ -355,15 +355,15 @@ def iterative_attack(
         if not os.path.isdir(os.path.join(".", "{}".format("results"))):
             os.mkdir(os.path.join(".", "{}".format("results")))
 
-        if original_data == "yes" or original_data == "y":
-            dataset_choice = "Original data" + " seed {}".format(rand_seed)
+        if recreated_data == "yes" or recreated_data == "y":
+            dataset_choice = "Recreated data" + " seed {}".format(rand_seed)
         else:
             dataset_choice = "Authors data" + " seed {}".format(rand_seed)
 
         if not os.path.isdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice))):
             os.mkdir(os.path.join(".", "{}".format("results"), "{}".format(dataset_choice)))
 
-        # make path name to folder (results/ original or authors data/ dataset name)
+        # make path name to folder (results/ recreated or authors data/ dataset name)
         dataset_namee = [i for i in model_name.split("_") if i in ["german", "drug", "compas"]][0] 
 
         # make folder if it does not exist
@@ -464,15 +464,15 @@ def init_gradient_attack_from_mask(
     attack_method,
     use_copy=True,
     ########### ADDITIONS #############
-    original_data=None,
+    recreated_data=None,
     rand_seed=0
     ###################################
     ):
 
     
     ######### ADDITIONS #################
-    if original_data == "yes" or original_data == "y":
-        DATA_FOLDER = os.path.join(".", "original_data")
+    if recreated_data == "yes" or recreated_data == "y":
+        DATA_FOLDER = os.path.join(".", "recreated_data")
     else:
         DATA_FOLDER = os.path.join(".", "authors_data")
     #####################################

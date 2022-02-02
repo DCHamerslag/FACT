@@ -1,6 +1,7 @@
 """
 We made this file to create the datasets. By Reversed engineering, we knew how the datasets were made. 
-Below are the functions to create the datasets. These are called when the 'original_data == yes' parameter.
+Below are the functions to create the datasets. These are called when the 'recreated_data == yes' parameter and if the
+datasets are yet not recreated.
 """
 
 import os 
@@ -10,8 +11,8 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 
 ########################### GERMAN DATASET ###########################
-def create_orig_german_dataset():
-    file_path = os.path.join("original_data", "resources", "german.data")
+def recreate_german_dataset():
+    file_path = os.path.join("recreated_data", "resources", "german.data")
     data = pd.read_csv(file_path, delim_whitespace=True, header=None)
     
     targets = data[data.columns[-1]] # TARGET labels
@@ -79,14 +80,14 @@ def create_orig_german_dataset():
     # Just a check
     # print(len(X_train), len(X_test), len(y_train), len(y_test), len(group_label) == len(y_train) + len(y_test))
     
-    np.savez(os.path.join("original_data", "data.npz"), X_train=X_train, Y_train=y_train, X_test=X_test, Y_test=y_test)
-    np.savez(os.path.join("original_data", "german_group_label.npz"), group_label=group_label)
+    np.savez(os.path.join("recreated_data", "data.npz"), X_train=X_train, Y_train=y_train, X_test=X_test, Y_test=y_test)
+    np.savez(os.path.join("recreated_data", "german_group_label.npz"), group_label=group_label)
 ######################################################################
 
 
 ########################### COMPAS DATASET ###########################
-def create_orig_compas_dataset():
-    data = pd.read_csv(os.path.join("original_data", "resources", "compas-scores-two-years.csv"))
+def recreate_compas_dataset():
+    data = pd.read_csv(os.path.join("recreated_data", "resources", "compas-scores-two-years.csv"))
     targets = data[data.columns[-1]]
 
     # Used columns as specified in the paper
@@ -131,15 +132,15 @@ def create_orig_compas_dataset():
     # print(len(X_train), len(X_test), len(y_train), len(y_test), len(group_label) == len(y_train) + len(y_test))
 
 
-    np.savez(os.path.join("original_data", "compas_data.npz"), X_train=X_train, Y_train=y_train, X_test=X_test, Y_test=y_test)
-    np.savez(os.path.join("original_data", "compas_group_label.npz"), group_label=group_label)
+    np.savez(os.path.join("recreated_data", "compas_data.npz"), X_train=X_train, Y_train=y_train, X_test=X_test, Y_test=y_test)
+    np.savez(os.path.join("recreated_data", "compas_group_label.npz"), group_label=group_label)
 ######################################################################
 
 
 ########################### DRUG DATASET ###########################
-def create_orig_drug_dataset():
+def recreate_drug_dataset():
     
-    file_path = os.path.join("original_data", "resources", "drug_consumption.data")
+    file_path = os.path.join("recreated_data", "resources", "drug_consumption.data")
     data = pd.read_csv(file_path, delimiter=",", header=None)
 
     targets = data.iloc[:, 20] ### Targets. In the real dataset it is attribute 21 (python goes from 0, thus 20 in our case).
@@ -203,6 +204,6 @@ def create_orig_drug_dataset():
     # Just a check
     # print(len(X_train), len(X_test), len(y_train), len(y_test), len(group_label) == len(y_train) + len(y_test))
 
-    np.savez(os.path.join("original_data", "drug2_data.npz"), X_train=X_train, Y_train=y_train, X_test=X_test, Y_test=y_test)
-    np.savez(os.path.join("original_data", "drug2_group_label.npz"), group_label=group_label)
+    np.savez(os.path.join("recreated_data", "drug2_data.npz"), X_train=X_train, Y_train=y_train, X_test=X_test, Y_test=y_test)
+    np.savez(os.path.join("recreated_data", "drug2_group_label.npz"), group_label=group_label)
 ######################################################################
