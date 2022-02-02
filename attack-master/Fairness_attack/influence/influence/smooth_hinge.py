@@ -25,24 +25,17 @@ def hinge(x):
     return tf.maximum(1-x, 0)
 
 def smooth_hinge_loss(x, t):    
-
-    # return tf.cond(
-    #     tf.equal(t, 0),
-    #     lambda: hinge(x),
-    #     lambda: log_loss(x,t)
-    #     )
-
     if t == 0:
         return hinge(x)
     else:
         return log_loss(x,t)
 
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+# def sigmoid(x):
+#     return 1 / (1 + np.exp(-x))
 
-def sigmoid_grad(x):
-    a = sigmoid(x)
-    return a * (1 - a)
+# def sigmoid_grad(x):
+#     a = sigmoid(x)
+#     return a * (1 - a)
 
 
 class SmoothHinge(GenericNeuralNet):
@@ -150,12 +143,6 @@ class SmoothHinge(GenericNeuralNet):
 
 
     def retrain(self, num_steps, feed_dict):
-        # self.sess.run(
-        #     self.update_learning_rate_op, 
-        #     feed_dict={self.learning_rate_placeholder: 1 * self.initial_learning_rate})        
-
-        # for step in xrange(num_steps):   
-        #     self.sess.run(self.train_op, feed_dict=feed_dict)
         if self.temp == 0:
             self.train_with_svm(feed_dict, save_checkpoints=False, verbose=False)
         else:
@@ -205,14 +192,6 @@ class SmoothHinge(GenericNeuralNet):
         fmin_hvp_fn = self.get_train_fmin_hvp_fn(train_feed_dict)
 
         x0 = np.array(self.sess.run(self.params)[0])
-        
-        # fmin_results = fmin_l_bfgs_b(
-        # # fmin_results = fmin_cg(
-        #     fmin_loss_fn,
-        #     x0,
-        #     fmin_grad_fn
-        #     # gtol=1e-8
-        #     )
 
         fmin_results = fmin_ncg(
             f=fmin_loss_fn,
@@ -231,7 +210,6 @@ class SmoothHinge(GenericNeuralNet):
         if save_checkpoints: self.saver.save(self.sess, self.checkpoint_file, global_step=0)
 
         if verbose:
-            # print('CG training took %s iter.' % model.n_iter_)
             print('After training with CG: ')
             results = self.print_model_eval()
         else:
@@ -239,52 +217,46 @@ class SmoothHinge(GenericNeuralNet):
 
         return results
 
+    # SVM is not used, but it could be used
+    # def train_with_svm(self, feed_dict, save_checkpoints=True, verbose=True):
 
-    def train_with_svm(self, feed_dict, save_checkpoints=True, verbose=True):
+    #     X_train = feed_dict[self.input_placeholder]
+    #     Y_train = feed_dict[self.labels_placeholder]
+    #     num_train_examples = len(Y_train)
+    #     assert len(Y_train.shape) == 1
+    #     assert X_train.shape[0] == Y_train.shape[0]
 
-        X_train = feed_dict[self.input_placeholder]
-        Y_train = feed_dict[self.labels_placeholder]
-        num_train_examples = len(Y_train)
-        assert len(Y_train.shape) == 1
-        assert X_train.shape[0] == Y_train.shape[0]
+    #     if num_train_examples == self.num_train_examples:
+    #         print('Using normal model')
+    #         model = self.svm_model
+    #     elif num_train_examples == self.num_train_examples - 1:
+    #         print('Using model minus one')
+    #         model = self.svm_model_minus_one
+    #     # else:
+    #     #     raise ValueError, "feed_dict has incorrect number of training examples"
 
-        if num_train_examples == self.num_train_examples:
-            print('Using normal model')
-            model = self.svm_model
-        elif num_train_examples == self.num_train_examples - 1:
-            print('Using model minus one')
-            model = self.svm_model_minus_one
-        # else:
-        #     raise ValueError, "feed_dict has incorrect number of training examples"
+    #     model.fit(X_train, Y_train)
+    #     # sklearn returns coefficients in shape num_classes x num_features
+    #     # whereas our weights are defined as num_features x num_classes
+    #     # so we have to tranpose them first.
+    #     if self.use_bias:
+    #         W = np.concatenate((np.reshape(model.coef_.T, -1), model.intercept_), axis=0)
+    #     else:
+    #         W = np.reshape(model.coef_.T, -1)
 
-        model.fit(X_train, Y_train)
-        # sklearn returns coefficients in shape num_classes x num_features
-        # whereas our weights are defined as num_features x num_classes
-        # so we have to tranpose them first.
-        if self.use_bias:
-            W = np.concatenate((np.reshape(model.coef_.T, -1), model.intercept_), axis=0)
-        else:
-            W = np.reshape(model.coef_.T, -1)
+    #     params_feed_dict = {}
+    #     params_feed_dict[self.W_placeholder] = W
+    #     self.sess.run(self.set_params_op, feed_dict=params_feed_dict)
+    #     if save_checkpoints: self.saver.save(self.sess, self.checkpoint_file, global_step=0)
 
-        params_feed_dict = {}
-        params_feed_dict[self.W_placeholder] = W
-        self.sess.run(self.set_params_op, feed_dict=params_feed_dict)
-        if save_checkpoints: self.saver.save(self.sess, self.checkpoint_file, global_step=0)
+    #     if verbose:
+    #         print('SVM training took %s iter.' % model.n_iter_)
+    #         print('After SVM training: ')
+    #         results = self.print_model_eval()
+    #     else: 
+    #         results = None
 
-        if verbose:
-            print('SVM training took %s iter.' % model.n_iter_)
-            print('After SVM training: ')
-            results = self.print_model_eval()
-        else: 
-            results = None
-
-        return results
-
-        # print('Starting SGD')
-        # for step in xrange(100):   
-        #     self.sess.run(self.train_op, feed_dict=feed_dict)
-
-        # self.print_model_eval()
+    #     return results
 
     def set_params(self):
         if self.use_bias:

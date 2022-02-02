@@ -10,17 +10,6 @@ import scipy.sparse as sparse
 import defenses
 import upper_bounds
 
-class NumpyEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, np.ndarray):
-            assert len(np.shape(obj)) == 1 # Can only handle 1D ndarrays
-            return obj.tolist()
-        elif isinstance(obj, np.floating):
-            return float(obj)
-        elif isinstance(obj, np.int16):
-            return str(obj)
-        else:
-            return super(NumpyEncoder, self).default(obj)
 
 # function to transform class maps
 def get_class_map():
@@ -257,34 +246,3 @@ def get_projection_fn(
 
     return project_onto_feasible_set
 
-
-def filter_points_outside_feasible_set(X, Y,
-                                       centroids, centroid_vec,
-                                       sphere_radii, slab_radii,
-                                       class_map):
-
-    # computes ||Q(x - mu)|| in the corresponding norm.
-    sphere_dists = defenses.compute_dists_under_Q(
-        X,
-        Y,
-        Q=None,
-        centroids=centroids,
-        class_map=class_map)
-
-    # computes ||Q(x - mu)|| in the corresponding norm.
-    slab_dists = defenses.compute_dists_under_Q(
-        X,
-        Y,
-        Q=centroid_vec,
-        centroids=centroids,
-        class_map=class_map)
-
-    idx_to_keep = np.array([True] * X.shape[0])
-    # filter out the indices outside the feasible set
-    for y in set(Y):
-        idx_to_keep[np.where(Y == y)[0][sphere_dists[Y == y] > sphere_radii[class_map[y]]]] = False
-        idx_to_keep[np.where(Y == y)[0][slab_dists[Y == y] > slab_radii[class_map[y]]]] = False
-
-    print(np.sum(idx_to_keep))
-    # return only indices to keep
-    return X[idx_to_keep, :], Y[idx_to_keep]
