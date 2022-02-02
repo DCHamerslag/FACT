@@ -80,7 +80,7 @@ We have added two parameters:
 We have added four folders in the main folder Fairness_attack:
 - authors_data: which is the data provided by the authors.
 - recreated_data: which consists of a resources folder that contains the original raw data. To try and reproduce the results of the authors, a file named make_datasets.py is automatically called if the datasets are not yet recreated and --recreated_data y is included in the run (otherwise it will skip creating new datasets). The process of reproducing the datasets, is covered in the next folder.
-- reverse_engineering: which also consists of the data provided by the authors as well as the original raw data. The Datasets - reverse_engineering notebook is there to show our reverse_engineering process and how we managed to create the same datasets by performing different operations and transformations.
+- recreation: which also consists of the data provided by the authors as well as the original raw data. The Datasets - Recreation notebook is there to show our recreation process and how we managed to create the same datasets by performing different operations and transformations.
 - results: which consists of a plot_results_all_metrics.ipynb and plot_results_best_metrics.ipynb file. The first is only there to show that different metrics (mean, max and last) have been evaluated to check which one is the most comparable to the results of the authors. The second notebook is there to plot the results with the best metrics (in our case last).
 
 Furthermore, for convenience, we set the **position of the sensitive feature at the start of each recreated dataset, thus sensitive_feature_idx should always be 0**, if --recreated_data y.
