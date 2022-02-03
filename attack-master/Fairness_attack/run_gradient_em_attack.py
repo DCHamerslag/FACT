@@ -216,6 +216,39 @@ if use_train:
 class_map, centroids, centroid_vec, sphere_radii, slab_radii = data.get_data_params(
     X_train, Y_train, percentile=percentile)
 
+train2 = DataSet(X_train, Y_train)
+validation2 = None
+test2 = DataSet(X_test, Y_test)
+data_sets2 = base.Datasets(train=train2, validation=validation2, test=test2)
+model2 = SmoothHinge(
+    positive_sensitive_el = positive_sensitive_el,
+    negative_sensitive_el = negative_sensitive_el,
+    sensitive_feature_idx = sensitive_idx,
+    input_dim=X_train.shape[1],
+    temp=temp,
+    weight_decay=weight_decay,
+    use_bias=True,
+    num_classes=num_classes,
+    batch_size=batch_size,
+    data_sets=data_sets2,
+    initial_learning_rate=initial_learning_rate,
+    decay_epochs=None,
+    mini_batch=False,
+    train_dir=output_root,
+    log_dir='log',
+    model_name=model_name,
+    method = attack_method,
+    general_train_idx=general_train_idx,
+    sensitive_file=sensitive_file,
+    ####### ADDITIONS ################
+    recreated_data=recreated_data,
+    rand_seed=rand_seed
+    ##################################
+    )
+
+model2.update_train_x_y(X_train, Y_train)
+model2.train()
+
 # If the training samples times epsilon is smaller than 2, exit
 if(X_train.shape[0]*epsilon < 2):
     print("The end")
