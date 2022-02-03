@@ -57,7 +57,12 @@ The code was tested in the environment provided by the authors. The following re
 
 To install all the requirements at once:
 ```bash
-pip install setuptools==19.2; pip install cvxpy==0.4.11; pip install CVXcanon==0.1.1; pip install scikit-learn==0.23.1; pip install tensorflow==1.12.3; pip install tensorboard==1.12.2; pip install numpy==1.16.2; pip install scs==2.1.2; pip install pandas==1.1.4; pip install scipy==1.1.0; pip install matplotlib==3.3.3; pip install tabulate==0.8.9; pip install seaborn==0.11.0; pip install tqdm==4.62.3; pip install pillow==8.0.1; pip install IPython 7.16.3
+conda create -n name python=3.6
+conda activate name
+```
+
+```bash
+pip install setuptools==19.2; pip install cvxpy==0.4.11; pip install CVXcanon==0.1.1; pip install scikit-learn==0.23.1; pip install tensorflow==1.12.3; pip install tensorboard==1.12.2; pip install numpy==1.16.2; pip install scs==2.1.2; pip install pandas==1.1.4; pip install scipy==1.1.0; pip install matplotlib==3.3.3; pip install tabulate==0.8.9; pip install seaborn==0.11.0; pip install tqdm==4.62.3; pip install pillow==8.0.1; pip install IPython 7.16.3;
 ```
 
 # Running Instructions
