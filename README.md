@@ -36,24 +36,24 @@ institution = "University of California, Irvine, School of Information and Compu
 
 # Tested Environment
 The code was tested in the environment provided by the authors. The following requirements would work:  
-Python 3.6
-PIP 20.3.1
-setuptools 19.2 (in most of the cases you have to downgrade)
-Tensorflow 1.12.3
-scikit-learn 0.23.1  
-tensorboard 1.12.2
-cvxpy 0.4.11 [cvxpy 1.0+ is not backwards compatible, therefore the downgrade of setuptools]
-CVXcanon 0.1.1  
-scs 2.1.2
-scipy 1.1.0  
-numpy 1.16.2
-pandas 1.1.4  
-Matplotlib 3.3.3  
-tabulate 0.8.9
-seaborn 0.11.0  
-tqdm 4.62.3
-IPython 7.16.1
-pillow 8.0.1
+- Python 3.6
+- PIP 20.3.1
+- setuptools 19.2 (in most of the cases you have to downgrade)
+- Tensorflow 1.12.3
+- scikit-learn 0.23.1  
+- tensorboard 1.12.2
+- cvxpy 0.4.11 [cvxpy 1.0+ is not backwards compatible, therefore the downgrade of setuptools]
+- CVXcanon 0.1.1  
+- scs 2.1.2
+- scipy 1.1.0  
+- numpy 1.16.2
+- pandas 1.1.4  
+- Matplotlib 3.3.3  
+- tabulate 0.8.9
+- seaborn 0.11.0  
+- tqdm 4.62.3
+- IPython 7.16.1
+- pillow 8.0.1
 
 
 # Running Instructions
