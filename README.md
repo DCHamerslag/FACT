@@ -57,7 +57,7 @@ The code was tested in the environment provided by the authors. The following re
 
 To install all the requirements at once:
 ```bash
-conda create -n name python=3.6 ;
+conda create -n name python=3.6
 conda activate name
 ```
 ```bash
