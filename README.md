@@ -55,7 +55,7 @@ The code was tested in the environment provided by the authors. The following re
 - IPython 7.16.1
 - pillow 8.0.1
 
-To install all the requirements at once:
+To install all the requirements using conda:
 ```bash
 conda create -n name python=3.6
 conda activate name
