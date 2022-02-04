@@ -104,5 +104,5 @@ To run the same example above with a different seed (+1 on the seeds implemented
 python run_gradient_em_attack.py --em_iter 0 --total_grad_iter 10000 --dataset german --use_slab --sensitive_feature_idx 0 --sensitive_attr_filename german_group_label.npz --method IAF --epsilon 0.1 --recreated_data y --rand_seed 1
 ```
 
-To plot the results after running all the attacks on all datasets with epsilons from 0.0 up to 1, a notebook called plot_results_best_metric is added. For seed 0 this will produce and automatically plot the following image (with the default seed) together with a dataframe which shows the time taken in seconds and the number of iterations for each attack. 
+To plot the results after running all the attacks on all datasets with epsilons from 0.0 up to 1, a notebook called plot_results_best_metric is added (in the results folder). For seed 0 this will produce and automatically plot the following image (with the default seed) together with a dataframe which shows the time taken in seconds and the number of iterations for each attack. 
 ![](./seed_0_results.png)
